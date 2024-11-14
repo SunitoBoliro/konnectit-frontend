@@ -1,9 +1,9 @@
-
+import AllRoutes from "./Allroutes/index"; // Adjust the path if necessary
 
 export default function App() {
   return (
-    <h1 className="text-3xl font-bold underline">
-      Hello world!
-    </h1>
-  )
+    <div className="text-3xl font-bold underline">
+      <AllRoutes />
+    </div>
+  );
 }
