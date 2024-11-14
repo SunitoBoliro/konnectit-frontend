@@ -2,21 +2,19 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import HomePage from "../Pages/Home";
 import Registration from "../Pages/Register";
 import LoginPage from "../Pages/Login";
+import ChatWindow from '../Pages/chatWindow'
 
-const AllRoutes = ({ isAuthenticated, handleLogin }) => {
+const AllRoutes = ({ isAuthenticated, handleLogin, handleLogout }) => {
     return (
         <Router>
             <Routes>
-                {/* Protect Home route - redirect to login if not authenticated */}
                 <Route
                     path="/"
-                    element={
-                        isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />
-                    }
+                    element={isAuthenticated ? <HomePage onLogout={handleLogout} /> : <Navigate to="/login" replace />}
                 />
-                {/* Login and Register routes */}
                 <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
-                <Route path="/register" element={<Registration onRegister={handleLogin} />} />
+                <Route path="/register" element={<Registration />} />
+                <Route path="/chatwindow" element={<ChatWindow />} />
             </Routes>
         </Router>
     );
