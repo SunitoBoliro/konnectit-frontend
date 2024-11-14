@@ -7,7 +7,6 @@ const LoginPage = ({ onLogin }) => {
     const [password, setPassword] = useState("");
 
     const handleLogin = () => {
-        // Mock login logic - add actual authentication logic here
         if (username && password) {
             onLogin();
             navigate("/", { replace: true });
@@ -17,9 +16,9 @@ const LoginPage = ({ onLogin }) => {
     };
 
     return (
-        <div className="flex items-center justify-center h-screen bg-gray-100">
-            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-sm">
-                <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+        <div className="flex items-center justify-center h-screen bg-gradient-to-r from-blue-500 to-indigo-600">
+            <div className="bg-white p-10 rounded-lg shadow-lg w-full max-w-md">
+                <h2 className="text-3xl font-bold mb-6 text-center text-indigo-600">Login</h2>
                 
                 <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-bold mb-2">Username</label>
@@ -28,7 +27,7 @@ const LoginPage = ({ onLogin }) => {
                         placeholder="Enter your username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                        className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-indigo-500"
                     />
                 </div>
                 
@@ -39,20 +38,26 @@ const LoginPage = ({ onLogin }) => {
                         placeholder="Enter your password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                        className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-indigo-500"
                     />
                 </div>
                 
                 <button
                     onClick={handleLogin}
-                    className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600"
+                    className="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded hover:bg-indigo-700 transition"
                 >
                     Login
                 </button>
                 
-                <p className="text-center text-sm text-gray-600 mt-4">
-                    Don't have an account? <a href="/register" className="text-blue-500 hover:underline">Register</a>
-                </p>
+                <div className="text-center mt-4">
+                    <p className="text-gray-600">Don't have an account?</p>
+                    <button
+                        onClick={() => navigate("/register")}
+                        className="mt-2 text-indigo-600 font-semibold hover:underline"
+                    >
+                        Create Account
+                    </button>
+                </div>
             </div>
         </div>
     );
