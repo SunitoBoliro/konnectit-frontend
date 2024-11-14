@@ -1,16 +1,22 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-// Import your pages
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import HomePage from "../Pages/Home";
 import Registration from "../Pages/Register";
 import LoginPage from "../Pages/Login";
 
-const AllRoutes = () => {
+const AllRoutes = ({ isAuthenticated, handleLogin }) => {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/register" element={<Registration />} />
-                <Route path="/login" element={<LoginPage />} />
+                {/* Protect Home route - redirect to login if not authenticated */}
+                <Route
+                    path="/"
+                    element={
+                        isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />
+                    }
+                />
+                {/* Login and Register routes */}
+                <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+                <Route path="/register" element={<Registration onRegister={handleLogin} />} />
             </Routes>
         </Router>
     );
