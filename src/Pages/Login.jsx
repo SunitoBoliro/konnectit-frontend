@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../Components/Api/authService";
-import "./home.css"
+import "./home.css";
 
 const LoginPage = ({ onLogin }) => {
     const navigate = useNavigate();
@@ -12,7 +12,7 @@ const LoginPage = ({ onLogin }) => {
     const handleLogin = async () => {
         try {
             const user = await loginUser({ email, password });
-            onLogin(user);
+            onLogin(); // Set authenticated state in App
             navigate("/", { replace: true });
         } catch (error) {
             setError(error);
