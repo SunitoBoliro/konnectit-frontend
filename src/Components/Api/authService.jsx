@@ -1,7 +1,7 @@
 // src/services/authService.js
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8000"; // Adjust this URL to match your backend
+const API_BASE_URL = "http://192.168.23.106:8000"; // Adjust this URL to match your backend
 
 // Register a new user
 export const registerUser = async (userData) => {
