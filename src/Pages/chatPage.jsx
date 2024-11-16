@@ -8,7 +8,7 @@ const ChatPage = () => {
     return (
         <div className="flex h-screen bg-gray-900 text-white">
             {/* Chats List */}
-            <div className="w-1/3 border-r border-gray-700">
+            <div className="ml-20 w-1/3 border-r border-gray-700">
                 <Chats setSelectedChat={setSelectedChat} />
             </div>
 
