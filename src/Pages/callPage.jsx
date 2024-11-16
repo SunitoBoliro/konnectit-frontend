@@ -5,7 +5,6 @@ import callinfo from "../Components/callinfo";
 
 const ChatPage = () => {
     const [selectedChat, setSelectedChat] = useState(null);
-    const [selectedCallInfo, setSelectedCallInfo] = useState(null);
 
     return (
         <div className="flex h-screen bg-gray-900 text-white">
@@ -18,7 +17,7 @@ const ChatPage = () => {
             <div className="w-2/3">
                 {selectedChat ? (
                     sessionStorage.setItem("callinfo", selectedChat)
-                )}
+                ) : null} 
                 {selectedChat ? (
                     <CallInfo/>
                 ) : (
