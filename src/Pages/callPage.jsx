@@ -3,7 +3,7 @@ import CallsList from "../Components/calls";
 import CallInfo from "../Components/callinfo";
 import callinfo from "../Components/callinfo";
 
-const ChatPage = () => {
+const CallPage = () => {
     const [selectedChat, setSelectedChat] = useState(null);
 
     return (
@@ -30,4 +30,4 @@ const ChatPage = () => {
     );
 };
 
-export default ChatPage;
+export default CallPage;
