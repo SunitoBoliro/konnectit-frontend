@@ -4,6 +4,7 @@ import Registration from "../Pages/Register";
 import LoginPage from "../Pages/Login";
 import ChatWindow from "../Pages/chatWindow";
 import ChatPage from "../Pages/chatPage";
+import CallPage  from "../Pages/callPage"
 
 const AllRoutes = ({ isAuthenticated, handleLogin, handleLogout }) => {
     return (
@@ -16,7 +17,7 @@ const AllRoutes = ({ isAuthenticated, handleLogin, handleLogout }) => {
             <Route path="/register" element={<Registration />} />
             <Route path="/chatwindow" element={<ChatWindow />} />
             <Route path="/chatpage" element={<ChatPage />} />
-            <Route path="/call" element={<div>Call Page</div>} />
+            <Route path="/callpage" element={<CallPage />} />
         </Routes>
     );
 };

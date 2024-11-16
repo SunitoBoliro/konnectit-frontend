@@ -22,7 +22,7 @@ const NavBar = ({ onLogout }) => {
                     </li>
                     <li>
                         <button
-                            onClick={() => navigate("/call")}
+                            onClick={() => navigate("/callpage")}
                             className="flex items-center space-x-3 hover:text-amber-300 transition"
                         >
                             <AiOutlinePhone size={24} />
