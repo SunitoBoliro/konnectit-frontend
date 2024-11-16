@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import CallsList from "../Components/calls";
 import CallInfo from "../Components/callinfo";
+import callinfo from "../Components/callinfo";
 
 const ChatPage = () => {
     const [selectedChat, setSelectedChat] = useState(null);
+    const [selectedCallInfo, setSelectedCallInfo] = useState(null);
 
     return (
         <div className="flex h-screen bg-gray-900 text-white">
@@ -15,7 +17,10 @@ const ChatPage = () => {
             {/* Chat Window */}
             <div className="w-2/3">
                 {selectedChat ? (
-                    <CallInfo chat={selectedChat} />
+                    sessionStorage.setItem("callinfo", selectedChat)
+                )}
+                {selectedChat ? (
+                    <CallInfo/>
                 ) : (
                     <div className="flex items-center justify-center h-full text-gray-500">
                         Select a chat to start messaging.
