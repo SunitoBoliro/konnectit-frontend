@@ -15,7 +15,7 @@ const HomePage = () => {
                     Connect, chat, and share with friends in a secure, stylish space.
                 </p>
                 <button
-                    onClick={() => navigate("/chatwindow")}
+                    onClick={() => navigate("/chatpage")}
                     className="px-8 py-3 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-full shadow-md transition-transform transform hover:scale-105 neon-button"
                 >
                     Start Chatting

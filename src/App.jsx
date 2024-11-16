@@ -57,7 +57,7 @@ export default function App() {
 
 const ConditionalNavBar = ({ isAuthenticated, handleLogout }) => {
     const location = useLocation();
-    const hideNavBar = ["/login", "/register"].includes(location.pathname);
+    const hideNavBar = ["/","/login", "/register"].includes(location.pathname);
 
     return !hideNavBar && isAuthenticated ? <NavBar onLogout={handleLogout} /> : null;
 };

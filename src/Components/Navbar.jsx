@@ -42,7 +42,7 @@ const NavBar = ({ onLogout }) => {
                         <ul className="space-y-6">
                             <li>
                                 <button
-                                    onClick={() => navigate("/chatwindow")}
+                                    onClick={() => navigate("/chatpage")}
                                     className="flex items-center space-x-3 hover:text-amber-300 transition"
                                 >
                                     <AiOutlineMessage size={24} />
