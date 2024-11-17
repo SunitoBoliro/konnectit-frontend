@@ -1,14 +1,21 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { fetchChats } from "../Components/Api/chatServies";
 
 const Chats = ({ setSelectedChat }) => {
-    const chats = [
-        { id: 1, name: "India Sidra", message: "Mashaallah 😘", time: "1:50 pm" },
-        { id: 2, name: "Kinza Sana", message: "Masha Allah", time: "3:21 pm" },
-        { id: 3, name: "XI-B Pre-Medical KPC", message: "~ Basit: 📢 Join Us for an Orientation Session!", time: "2:36 pm" },
-        { id: 4, name: "Sobia", message: "🌼 Ok", time: "2:08 pm" },
-        { id: 5, name: "Me Hoooo", message: "🎵 Audio", time: "2:06 pm" },
-        { id: 6, name: "Amina", message: "📷 Photo", time: "1:27 pm" },
-    ];
+    const [chats, setChats] = useState([]);
+
+    useEffect(() => {
+        const loadChats = async () => {
+            try {
+                const data = await fetchChats();
+                setChats(data);
+            } catch (error) {
+                console.error("Failed to load chats:", error);
+            }
+        };
+
+        loadChats();
+    }, []);
 
     return (
         <div className="p-4">
