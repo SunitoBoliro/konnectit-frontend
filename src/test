@@ -1,3 +1,5 @@
+// ab token store nahi horaha balkay undefined araha hai token may in local storage:
+
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AllRoutes from "./Allroutes/index";
@@ -8,7 +10,7 @@ export default function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const navigate = useNavigate();
 
-    // Check authentication state on initial load
+    // Check authentication state on initial load or when the token changes
     useEffect(() => {
         const checkAuth = async () => {
             const token = getToken();
@@ -36,8 +38,10 @@ export default function App() {
         }
     }, [isAuthenticated, navigate]);
 
-    const handleLogin = () => {
-        setIsAuthenticated(true); // Set authenticated to true on login
+    const handleLogin = (token) => {
+        localStorage.setItem("token", token); // Save the token in localStorage
+        setIsAuthenticated(true); // Set authenticated state
+        navigate("/", { replace: true }); // Redirect to home page after login
     };
 
     const handleLogout = () => {
@@ -57,7 +61,7 @@ export default function App() {
 
 const ConditionalNavBar = ({ isAuthenticated, handleLogout }) => {
     const location = useLocation();
-    const hideNavBar = ["/","/login", "/register"].includes(location.pathname);
+    const hideNavBar = ["/login", "/register"].includes(location.pathname);
 
     return !hideNavBar && isAuthenticated ? <NavBar onLogout={handleLogout} /> : null;
 };
