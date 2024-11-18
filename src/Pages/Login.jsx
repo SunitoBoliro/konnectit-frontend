@@ -11,11 +11,18 @@ const LoginPage = ({ onLogin }) => {
 
     const handleLogin = async () => {
         try {
-            const user = await loginUser({ email, password });
+            const response = await loginUser({ email, password });
             onLogin(); // Set authenticated state in App
+            localStorage.setItem("token", response.token);
+            localStorage.setItem("userId", response.userId);
             navigate("/", { replace: true });
         } catch (error) {
-            setError(error);
+            if (error instanceof Error) {
+                console.log(error.message)
+                setError(error.message);
+            } else {
+                setError("An unexpected error occurred");
+            }
         }
     };
 
@@ -53,9 +60,17 @@ const LoginPage = ({ onLogin }) => {
 
                 <div className="text-center mt-4">
                     <p className="text-indigo-300">Don't have an account?</p>
-                    <button onClick={() => navigate("/register")} className="mt-2 text-purple-400 font-semibold hover:underline">
-                        Create Account
-                    </button>
+                    <button
+    onClick={() => {
+        console.log("Navigating to register");
+        navigate("/register");
+    }}
+    className="mt-2 text-purple-400 font-semibold hover:underline"
+>
+    Create Account
+</button>
+
+
                 </div>
             </div>
         </div>

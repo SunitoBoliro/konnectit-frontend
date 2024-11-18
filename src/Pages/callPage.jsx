@@ -3,9 +3,8 @@ import CallsList from "../Components/calls";
 import CallInfo from "../Components/callinfo";
 import callinfo from "../Components/callinfo";
 
-const ChatPage = () => {
+const CallPage = () => {
     const [selectedChat, setSelectedChat] = useState(null);
-    const [selectedCallInfo, setSelectedCallInfo] = useState(null);
 
     return (
         <div className="flex h-screen bg-gray-900 text-white">
@@ -16,9 +15,13 @@ const ChatPage = () => {
 
             {/* Chat Window */}
             <div className="w-2/3">
+<<<<<<< HEAD
+                {sessionStorage.setItem("callinfo", selectedChat)}
+=======
                 {selectedChat ? (
                     sessionStorage.setItem("callinfo", selectedChat)
-                )}
+                ) : null} 
+>>>>>>> 6100f5566c7cafc5f599de64521d323147a20dee
                 {selectedChat ? (
                     <CallInfo/>
                 ) : (
@@ -31,4 +34,4 @@ const ChatPage = () => {
     );
 };
 
-export default ChatPage;
+export default CallPage;

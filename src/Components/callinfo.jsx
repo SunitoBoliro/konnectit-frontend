@@ -34,7 +34,7 @@ const CallInfo = ({selectedCallInfo}) => {
     };
 
     // Get the current call details based on the id
-    console.log("id==>", id)
+    // console.log("id==>", id)
     const call = callDetails[sessionStorage.getItem("callinfo")];
 
     if (!call) {
@@ -44,7 +44,7 @@ const CallInfo = ({selectedCallInfo}) => {
     return (
         <div className="bg-gray-900 text-white h-screen p-4">
             <h1
-                className="text-2xl mb-4 px-4 py-2 rounded-lg"
+                className="text-2xl font-bold mb-4"
             >
                 Call Info
             </h1>

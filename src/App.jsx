@@ -26,7 +26,7 @@ export default function App() {
                 }
             } else {
                 setIsAuthenticated(false); // No token found
-                navigate("/login", { replace: true }); // Redirect to login page
+                // navigate("/login", { replace: true }); // Redirect to login page
             }
         };
 
