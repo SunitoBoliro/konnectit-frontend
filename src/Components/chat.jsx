@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { fetchChats } from "../Components/Api/chatServies";
 
+// Ensure that Chats component calls setSelectedChat to update the chat
 const Chats = ({ setSelectedChat }) => {
     const [chats, setChats] = useState([]);
 
@@ -48,5 +49,6 @@ const Chats = ({ setSelectedChat }) => {
         </div>
     );
 };
+
 
 export default Chats;
