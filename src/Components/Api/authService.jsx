@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://192.168.18.232:8000"; // Adjust this URL to match your backend
+const API_BASE_URL = "http://192.168.23.108:8000"; // Adjust this URL to match your backend
 
 // Get token from localStorage
 export const getToken = () => localStorage.getItem("token");

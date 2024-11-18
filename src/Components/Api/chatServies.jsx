@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Base URL for the API
-const API_BASE_URL = "http://192.168.18.232:8000"; // Replace with your API base URL
+const API_BASE_URL = "http://192.168.23.108:8000"; // Replace with your API base URL
 
 // API service for getting chats
 export const fetchChats = async () => {
