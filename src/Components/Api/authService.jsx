@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://192.168.23.108:8000"; // Adjust this URL to match your backend
+const API_BASE_URL = "http://192.168.23.109:8000"; // Adjust this URL to match your backend
 
 // Get token from localStorage
 export const getToken = () => localStorage.getItem("token");
@@ -34,6 +34,7 @@ export const loginUser = async (loginData) => {
         const response = await axios.post(`${API_BASE_URL}/login`, loginData);
         const token = response.data.token;
         localStorage.setItem("token", token); // Store token on successful login
+        localStorage.setItem("email", response.data.user.email); // Store token on successful login
         return response.data;
     } catch (error) {
         throw error.response.data.detail;

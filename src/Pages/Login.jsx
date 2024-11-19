@@ -11,11 +11,19 @@ const LoginPage = ({ onLogin }) => {
 
     const handleLogin = async () => {
         try {
-            const user = await loginUser({ email, password });
+            const response = await loginUser({ email, password });
             onLogin(); // Set authenticated state in App
+            localStorage.setItem("token", response.token);
+            localStorage.setItem("userId", response.userId);
+            localStorage.setItem("userId", response.userId);
             navigate("/", { replace: true });
         } catch (error) {
-            setError(error);
+            if (error instanceof Error) {
+                console.log(error.message)
+                setError(error.message);
+            } else {
+                setError("An unexpected error occurred");
+            }
         }
     };
 

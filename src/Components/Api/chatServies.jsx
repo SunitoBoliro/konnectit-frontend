@@ -14,29 +14,11 @@ export const fetchChats = async () => {
     }
 };
 
-// API service for fetching messages (Polling)
-export const fetchMessages = async (chatId, lastChecked = null) => {
-    try {
-        const params = {};
-        if (lastChecked) params.last_checked = lastChecked;
-
-        const response = await axios.get(`${API_BASE_URL}/chats/${chatId}/messages`, {
-            params,
-        });
-        return response.data.new_messages;
-    } catch (error) {
-        console.error("Error fetching messages:", error);
-        throw error;
-    }
-};
-
 // API service for sending messages
-export const sendMessageApi = async (chatId, message, senderId, receiverId) => {
+export const sendMessageApi = async (chatId, message) => {
     try {
         const response = await axios.post(`${API_BASE_URL}/chats/${chatId}/messages`, {
-            sender_id: senderId,
-            receiver_id: receiverId,
-            content: message,
+            message,
         });
         return response.data;
     } catch (error) {
@@ -44,3 +26,10 @@ export const sendMessageApi = async (chatId, message, senderId, receiverId) => {
         throw error;
     }
 };
+
+
+// WebSocket connection for real-time messaging
+export const createWebSocketConnection = () => {
+    const socket = new WebSocket(`${API_BASE_URL}/ws`); // Replace with your WebSocket endpoint
+    return socket; // Use this to send/receive messages
+  };

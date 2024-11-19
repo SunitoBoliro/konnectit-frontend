@@ -1,88 +1,131 @@
-import React, { useEffect, useState } from "react";
-import MessageInput from "./MessageInput";
-import { fetchMessages, sendMessageApi } from "../Components/Api/chatServies";
+import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
 
-const ChatWindow = ({ chat }) => {
-    const [messages, setMessages] = useState([]);
-    const [lastChecked, setLastChecked] = useState(null); // Track the last fetched time
+const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId }) => {
+    const [newMessage, setNewMessage] = useState("");
+    const [userStatus, setUserStatus] = useState({ online: false, last_seen: null });
+    const userId = localStorage.getItem("userId");
+    const userEmail = localStorage.getItem("email");
+    const chatUser = sessionStorage.getItem("chatUser")
+    const messagesEndRef = useRef(null); // Ref to track the end of the message list
 
-    // Poll for new messages
+    // Automatically scroll to the latest message
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    // Scroll to bottom whenever messages change
     useEffect(() => {
-        let pollingInterval;
+        scrollToBottom();
+    }, [messages]);
 
-        const pollMessages = async () => {
-            try {
-                const newMessages = await fetchMessages(chat.id, lastChecked);
-                if (newMessages && newMessages.length > 0) {
-                    setMessages((prev) => [...prev, ...newMessages]);
-                    setLastChecked(new Date().toISOString()); // Update last checked time
+    // Automatically listen for incoming WebSocket messages and update the state
+    useEffect(() => {
+        if (webSocket) {
+            webSocket.onmessage = (event) => {
+                const receivedMessage = JSON.parse(event.data);
+
+                // Prevent the sender from seeing their own message again
+                if (receivedMessage.sender !== userEmail) {
+                    setMessages((prev) => [...prev, receivedMessage]);
                 }
+            };
+        }
+    }, [webSocket, setMessages]);
+
+    // Fetch user status from the backend
+    useEffect(() => {
+        const fetchUserStatus = async () => {
+            try {
+                const response = await axios.get(`http://192.168.23.109:8000/user-status/${chatUser}`);
+                console.log(response.data)
+                setUserStatus(response.data);
             } catch (error) {
-                console.error("Error polling messages:", error);
+                console.error("Error fetching user status:", error);
             }
         };
 
-        // Start polling every 5 seconds
-        pollingInterval = setInterval(pollMessages, 5000);
+        // Fetch status initially and then every minute
+        fetchUserStatus();
+        const interval = setInterval(fetchUserStatus, 60000);
 
-        return () => {
-            clearInterval(pollingInterval); // Clean up on unmount
+        return () => clearInterval(interval);
+    }, [chatUser]);
+
+    const sendMessage = () => {
+        if (!newMessage.trim()) return;
+
+        const message = {
+            chatId: chatId,
+            content: newMessage,
+            timestamp: new Date().toISOString(),
+            sender: userEmail,
         };
-    }, [chat.id, lastChecked]);
 
-    const sendMessage = async (message) => {
-        const senderId = 1; // Replace with actual sender ID logic
-        const receiverId = 2; // Replace with actual receiver ID logic
+        if (webSocket?.readyState === WebSocket.OPEN) {
+            webSocket.send(JSON.stringify(message)); // Send message to WebSocket server
 
-        if (!senderId || !receiverId || !chat.id) {
-            console.error("Required fields are missing");
-            return;
-        }
+            // Only add the message to the state once it has been successfully sent to the server
+            setMessages((prev) => [...prev, message]);
 
-        setMessages([...messages, { sender: "user", text: message }]);
-
-        try {
-            const response = await sendMessageApi(chat.id, message, senderId, receiverId);
-            setMessages((prev) => [...prev, { sender: "bot", text: response.reply }]);
-        } catch (error) {
-            console.error("Error sending message:", error);
-            setMessages((prev) => [...prev, { sender: "bot", text: "Failed to send message" }]);
+            setNewMessage(""); // Clear the input field
+        } else {
+            console.error("WebSocket is not open");
         }
     };
 
     return (
-        <div className="flex flex-col h-full">
-            {/* Header */}
-            <div className="p-4 bg-gray-800 flex items-center">
-                <img
-                    src="https://placehold.co/40x40"
-                    alt={chat.name}
-                    className="w-10 h-10 rounded-full mr-3"
+        <div className="p-4">
+            <h1 className="text-xl font-bold mb-4">Chat with {chat.name}</h1>
+            <div className="text-gray-500 mb-4">
+                {userStatus.online ? (
+                    <span>User is online</span>
+                ) : (
+                    <span>User was last seen at {userStatus.last_seen ? new Date(userStatus.last_seen).toLocaleTimeString() : "unknown time"}</span>
+                )}
+            </div>
+            <div className="h-[calc(100vh-200px)] overflow-y-auto mb-4">
+                {messages.length > 0 ? (
+                    <ul className="space-y-2">
+                        {messages.map((msg, index) => (
+                            <li
+                                key={index}
+                                className={`flex ${msg.sender === userEmail ? "justify-end" : "justify-start"}`}
+                            >
+                                <div
+                                    className={`p-2 rounded-lg ${
+                                        msg.sender === userEmail ? "bg-blue-500" : "bg-gray-800"
+                                    }`}
+                                >
+                                    <p>{msg.content}</p>
+                                    <small className="text-xs text-gray-400">
+                                        {new Date(msg.timestamp).toLocaleTimeString()}
+                                    </small>
+                                </div>
+                            </li>
+                        ))}
+                        {/* Invisible div to ensure scrolling works */}
+                        <div ref={messagesEndRef} />
+                    </ul>
+                ) : (
+                    <div className="text-gray-500">No messages yet</div>
+                )}
+            </div>
+            <div className="flex">
+                <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Type a message"
+                    className="w-full p-2 rounded-lg bg-gray-800 text-white"
                 />
-                <div>
-                    <h2 className="text-lg font-bold">{chat.name}</h2>
-                    <p className="text-sm text-gray-400">Last seen just now</p>
-                </div>
+                <button
+                    onClick={sendMessage}
+                    className="p-2 bg-blue-500 text-white rounded-lg ml-2"
+                >
+                    Send
+                </button>
             </div>
-
-            {/* Messages */}
-            <div className="flex-1 p-4 overflow-y-auto bg-gray-900">
-                {messages.map((msg, index) => (
-                    <div
-                        key={index}
-                        className={`mb-4 p-3 rounded-lg shadow-lg ${
-                            msg.sender === "user"
-                                ? "bg-blue-500 text-white self-end"
-                                : "bg-gray-700 text-white self-start"
-                        }`}
-                    >
-                        {msg.content || msg.text}
-                    </div>
-                ))}
-            </div>
-
-            {/* Input */}
-            <MessageInput sendMessage={sendMessage} />
         </div>
     );
 };
