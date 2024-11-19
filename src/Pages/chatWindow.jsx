@@ -66,9 +66,9 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId }) => {
     };
 
     return (
-        <div className="  bg-[#FEECE2] ">
+        <div className="  bg-[#B1C381] ">
 
-<div className="flex items-center bg-[#092635] p-4  shadow-md">
+<div className="flex items-center bg-[#1B4242] p-4  shadow-md">
   <img
     src={chat.image}
     alt={`${chat.name} avatar`}
@@ -124,7 +124,7 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId }) => {
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type a message"
-                    className="w-full p-2  rounded-lg bg-[#5C8374] text-white"
+                    className="w-full p-2   bg-[#5C8374] text-white"
                 />
                 <button
   onClick={sendMessage}
