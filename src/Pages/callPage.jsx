@@ -15,13 +15,9 @@ const CallPage = () => {
 
             {/* Chat Window */}
             <div className="w-2/3">
-<<<<<<< HEAD
-                {sessionStorage.setItem("callinfo", selectedChat)}
-=======
                 {selectedChat ? (
                     sessionStorage.setItem("callinfo", selectedChat)
-                ) : null} 
->>>>>>> 6100f5566c7cafc5f599de64521d323147a20dee
+                ) : null}
                 {selectedChat ? (
                     <CallInfo/>
                 ) : (

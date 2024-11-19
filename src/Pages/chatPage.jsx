@@ -9,19 +9,26 @@ const ChatPage = () => {
     const [messages, setMessages] = useState([]);
     const [users, setUsers] = useState([]);
     const [error, setError] = useState("");
+    const [retryCount, setRetryCount] = useState(0);
+    const [chatId, setChatId] = useState("")
 
     useEffect(() => {
+        // Fetch users from the backend
         const fetchUsers = async () => {
             try {
                 const token = localStorage.getItem("token");
-                if (!token) throw new Error("Token not found in local storage");
-
+                if (!token) {
+                    throw new Error("Token not found in local storage");
+                }
                 const response = await axios.get("http://192.168.23.109:8000/users", {
-                    params: { token },
+                    params: { token: encodeURIComponent(token) }
                 });
                 setUsers(response.data);
-            } catch (err) {
-                handleError(err, "Failed to fetch users");
+            } catch (error) {
+                console.error("Error fetching users:", error);
+                setError(
+                    error.response?.data?.detail || "Failed to fetch users"
+                );
             }
         };
 
@@ -30,54 +37,81 @@ const ChatPage = () => {
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        if (!token) return;
 
-        const ws = new WebSocket(`ws://192.168.23.109:8000/ws/${encodeURIComponent(token)}`);
+        if (!token) {
+            setError("Token not found in local storage");
+            return;
+        }
 
-        ws.onopen = () => console.log("Connected to WebSocket server");
-        ws.onmessage = (event) => {
-            try {
+        const connectWebSocket = () => {
+            console.log("Connecting to WebSocket...");
+            const ws = new WebSocket(`ws://192.168.23.109:8000/ws/${encodeURIComponent(token)}`);
+
+            ws.onopen = () => {
+                console.log("Connected to WebSocket server");
+                setError("");
+                setRetryCount(0);
+            };
+
+            ws.onmessage = (event) => {
                 const message = JSON.parse(event.data);
+                console.log("Received message:", message);
                 setMessages((prevMessages) => [...prevMessages, message]);
-            } catch (err) {
-                console.error("Error parsing WebSocket message:", err);
-            }
+            };
+
+            ws.onclose = () => {
+                console.error("WebSocket closed. Attempting to reconnect...");
+                // setRetryCount((prev) => prev + 1);
+                //
+                // // Retry with exponential backoff
+                // const retryTimeout = Math.min(1000 * Math.pow(2, retryCount), 30000);
+                // setTimeout(connectWebSocket, retryTimeout);
+            };
+
+            ws.onerror = (error) => {
+                console.error("WebSocket error:", error);
+                setError("WebSocket error. Check server or network.");
+            };
+
+            setWebSocket(ws);
+
+            return () => {
+                ws.close();
+                // console.log("closed comment ws ion chatPage file line 80")
+            };
         };
-        ws.onclose = () => console.log("Disconnected from WebSocket server");
-        ws.onerror = (err) => handleError(err, "WebSocket error");
 
-        setWebSocket(ws);
+        connectWebSocket();
 
-        return () => ws.close();
-    }, []);
+        // Cleanup function
+        return () => {
+            if (webSocket) webSocket.close();
+        };
+    }, [retryCount]);
 
     useEffect(() => {
         if (selectedChat) {
-            fetchMessages(selectedChat.id);
+            fetchMessages(selectedChat.email);
         }
     }, [selectedChat]);
-
-    const handleError = (error, defaultMessage) => {
-        console.error(error);
-        setError(error.response?.data?.detail || defaultMessage);
-    };
 
     const fetchMessages = async (chatId) => {
         try {
             const token = localStorage.getItem("token");
-            if (!token) throw new Error("Token not found in local storage");
-
-            const response = await axios.get(`http://192.168.23.109:8000/messages/${chatId}`, {
-                params: { token },
+            const sender = localStorage.getItem("email")
+            const response = await axios.get(`http://192.168.23.109:8000/messages/${chatId}/${sender}`, {
+                params: { token: encodeURIComponent(token) }
             });
             setMessages(response.data);
-        } catch (err) {
-            handleError(err, "Failed to fetch messages");
+        } catch (error) {
+            console.error("Error fetching messages:", error);
+            setError(error.response?.data?.detail || "Failed to fetch messages");
         }
     };
 
     const handleChatSelection = async (user) => {
-        const chatId = user.email;
+        const chatId = user.email;  // Use the recipient's email as the chatId
+        setChatId(chatId)
 
         const token = localStorage.getItem("token");
         const userId = localStorage.getItem("userId");
@@ -88,24 +122,32 @@ const ChatPage = () => {
         }
 
         try {
-            await axios.post(
+            const response = await axios.post(
                 `http://192.168.23.109:8000/chats/${userId}/join`,
                 { chatId },
-                { params: { token } }
+                { params: { token: encodeURIComponent(token) } }
             );
-            setSelectedChat({ id: chatId, name: user.username, email: user.email });
-            setMessages([]);
-        } catch (err) {
-            handleError(err, "Failed to join chat");
+            const createdChatId = response.data.chatId;
+            setSelectedChat({ id: createdChatId, name: user.username, email: user.email });
+            setMessages([]);  // Clear previous messages when a new chat is selected
+        } catch (error) {
+            console.error("Error creating chat:", error);
+            setError(error.response?.data?.detail || "Failed to create chat");
         }
     };
-
     return (
         <div className="flex h-screen bg-gray-900 text-white">
+            {/* Chats List */}
             <div className="ml-20 w-1/3 border-r border-gray-700">
                 <Chats users={users} setSelectedChat={handleChatSelection} />
-                {error && <div className="mt-4 text-red-500 text-sm">{error}</div>}
+                {error && (
+                    <div className="mt-4 text-red-500 text-sm">
+                        {error}
+                    </div>
+                )}
             </div>
+
+            {/* Chat Window */}
             <div className="w-2/3">
                 {selectedChat ? (
                     <ChatWindow
@@ -113,6 +155,7 @@ const ChatPage = () => {
                         webSocket={webSocket}
                         messages={messages}
                         setMessages={setMessages}
+                        chatId={chatId}
                     />
                 ) : (
                     <div className="flex items-center justify-center h-full text-gray-500">
