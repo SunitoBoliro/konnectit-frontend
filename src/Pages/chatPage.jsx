@@ -100,7 +100,7 @@ const ChatPage = () => {
                         chatId={chatId}
                     />
                 ) : (
-                    <div className="flex items-center justify-center h-full text-gray-500 bg-[#1B4242] rounded-lg shadow-lg">
+                    <div className="flex items-center justify-center h-full text-white bg-[#1B4242] rounded-lg shadow-lg">
                         Select a chat to start messaging.
                     </div>
                 )}

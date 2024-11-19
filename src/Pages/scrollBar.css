@@ -18,7 +18,7 @@
 
 .custom-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: #4a5568 #2d3748; /* Thumb color, Track color */
+    scrollbar-color: #5C8374 #1B4242; /* Thumb color, Track color */
     scroll-behavior: smooth;
     overflow-x: hidden;
 }

@@ -28,13 +28,13 @@ const LoginPage = ({ onLogin }) => {
     };
 
     return (
-        <div className="flex items-center justify-center h-screen bg-gradient-to-r from-purple-500 via-blue-600 to-indigo-700 text-white">
+        <div className="flex items-center justify-center h-screen bg-gradient-to-r from-[#1B4242] via-[#5C8374] to-[#9EC8B9] text-white">
             <div className="bg-gray-900 p-10 rounded-lg shadow-2xl w-full max-w-md border border-indigo-500 neon-glow">
-                <h2 className="text-4xl font-bold mb-6 text-center text-indigo-400">Login</h2>
+                <h2 className="text-4xl font-bold mb-6 text-center text-teal-400">Login</h2>
                 {error && <p className="text-red-500 mb-4">{error}</p>}
 
                 <div className="mb-4">
-                    <label className="block text-indigo-300 text-sm font-semibold mb-2">Email</label>
+                    <label className="block text-teal-300 text-sm font-semibold mb-2">Email</label>
                     <input
                         type="email"
                         placeholder="Enter your email"
@@ -45,7 +45,7 @@ const LoginPage = ({ onLogin }) => {
                 </div>
 
                 <div className="mb-6">
-                    <label className="block text-indigo-300 text-sm font-semibold mb-2">Password</label>
+                    <label className="block text-teal-300 text-sm font-semibold mb-2">Password</label>
                     <input
                         type="password"
                         placeholder="Enter your password"
@@ -55,7 +55,7 @@ const LoginPage = ({ onLogin }) => {
                     />
                 </div>
 
-                <button onClick={handleLogin} className="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-600 transition transform hover:scale-105 neon-button">
+                <button onClick={handleLogin} className="w-full bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition transform hover:scale-105 neon-button">
                     Login
                 </button>
 
@@ -66,7 +66,7 @@ const LoginPage = ({ onLogin }) => {
         console.log("Navigating to register");
         navigate("/register");
     }}
-    className="mt-2 text-purple-400 font-semibold hover:underline"
+    className="text-green-400 font-semibold hover:underline"
 >
     Create Account
 </button>

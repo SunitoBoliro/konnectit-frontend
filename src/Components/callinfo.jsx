@@ -1,5 +1,6 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import "../Pages/scrollbar.css"
 
 const CallInfo = ({selectedCallInfo}) => {
     const { id } = useParams(); // Get the call ID from the URL
@@ -42,13 +43,13 @@ const CallInfo = ({selectedCallInfo}) => {
     }
 
     return (
-        <div className="bg-gray-900 text-white h-screen p-4">
+        <div className="bg-[#1B4242] text-white h-screen p-4 overflow-y-auto custom-scrollbar">
             <h1
                 className="text-2xl font-bold mb-4"
             >
                 Call Info
             </h1>
-            <div className="bg-gray-800 p-4 rounded-lg">
+            <div className="bg-[#5C8374] p-4 rounded-lg">
                 <h1 className="text-xl font-bold mb-2">{call.name}</h1>
                 <p className="text-sm text-gray-400">{call.time}</p>
                 <p className="text-sm mt-2">{call.status} voice call</p>

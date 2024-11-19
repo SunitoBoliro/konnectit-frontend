@@ -21,8 +21,8 @@ const Registration = () => {
     };
 
     return (
-        <div className="flex items-center justify-center h-screen bg-gradient-to-r from-green-500 via-teal-600 to-blue-700 text-white">
-            <div className="bg-gray-900 p-10 rounded-lg shadow-2xl w-full max-w-md border border-teal-500 neon-glow">
+        <div className="flex items-center justify-center h-screen bg-gradient-to-r from-[#1B4242] via-[#5C8374] to-[#9EC8B9] text-white">
+            <div className="bg-[#092635] p-10 rounded-lg shadow-2xl w-full max-w-md border border-teal-500 neon-glow">
                 <h2 className="text-4xl font-bold mb-6 text-center text-teal-400">Register</h2>
                 {error && <p className="text-red-500 mb-4">{error}</p>}
 
