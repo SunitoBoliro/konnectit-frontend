@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { fetchChats } from "../Components/Api/chatServies";
+// import { fetchChats } from "../Components/Api/chatServies";
 
 const Chats = ({ users, setSelectedChat }) => {
     return (
-        <div className="p-4">
-            <h1 className="text-xl font-bold mb-4">Chats</h1>
+    <div className="p-4 ">
+            <h1 className="text-xl font-bold mb-4   ">Chats</h1>
             <input
                 type="text"
                 placeholder="Search"
-                className="w-full p-2 mb-4 rounded-lg bg-gray-800 text-white"
+                className="w-full p-2 mb-4 rounded-lg text-white bg-[#092635]"
             />
             <ul className="space-y-2">
                 {users.length > 0 ? (

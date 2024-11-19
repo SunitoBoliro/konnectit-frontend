@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://192.168.23.109:8000"; // Adjust this URL to match your backend
+const API_BASE_URL = import.meta.env.VITE_API_URL; // Adjust this URL to match your backend
+
+// const  API_BASE_URL = "http://192.168.23.107:8000"
 
 // Get token from localStorage
 export const getToken = () => localStorage.getItem("token");

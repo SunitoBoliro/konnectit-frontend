@@ -5,7 +5,7 @@ const NavBar = ({ onLogout }) => {
     const navigate = useNavigate();
 
     return (
-        <div className="fixed top-0 left-0 border-r border-gray-700 h-full w-20 bg-gray-900 text-white shadow-lg z-50 flex flex-col ">
+        <div className="fixed top-0 left-0 border-r border-gray-700 h-full w-20  bg-[#092635] text-white shadow-lg z-50 flex flex-col ">
             {/* Vertical Line */}
             {/*<div className="border-r border-gray-700 h-full"></div> /!* This adds the vertical line *!/*/}
 
