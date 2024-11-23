@@ -42,8 +42,9 @@ const getToken = () => localStorage.getItem("token");
 
 export const fetchUsers = async () => {
     const token = getToken();
+    const email = localStorage.getItem("currentLoggedInUser")
     if (!token) throw new Error("Token not found in local storage");
-    const response = await axios.get(`${API_BASE_URL}/users`, {
+    const response = await axios.get(`${API_BASE_URL}/users/${email}`, {
         params: { token: encodeURIComponent(token) },
     });
     return response.data;

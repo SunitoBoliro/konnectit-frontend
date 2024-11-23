@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import AllRoutes from "./Allroutes/index";
 import NavBar from "./Components/Navbar";
 import { validateToken, getToken } from "./Components/Api/authService";
+import axios from "axios";
 
 export default function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -40,10 +41,16 @@ export default function App() {
         setIsAuthenticated(true); // Set authenticated to true on login
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         setIsAuthenticated(false);
+        const userEmail = localStorage.getItem("currentLoggedInUser");
+        await axios.post(`http://192.168.23.109:8000/logout/${userEmail}`);
         localStorage.removeItem("token"); // Remove token on logout
-        navigate("/login", { replace: true }); // Redirect to login page
+        localStorage.removeItem("userId")
+        localStorage.removeItem("currentLoggedInUser")
+        localStorage.removeItem("chatUser")
+
+        navigate("/login", {replace: true}); // Redirect to login page
     };
 
     return (

@@ -14,19 +14,19 @@ const ChatPage = () => {
 
     localStorage.setItem("chatUser", selectedChat?.email || "");
 
-    useEffect(() => {
-        const fetchUsersData = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                if (!token) throw new Error("Token not found in local storage");
-                const data = await fetchUsers(token);
-                setUsers(data);
-            } catch (error) {
-                console.error("Error fetching users:", error);
-                setError(error.response?.data?.detail || "Failed to fetch users");
-            }
-        };
+    const fetchUsersData = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("Token not found in local storage");
+            const data = await fetchUsers(token);
+            setUsers(data);
+        } catch (error) {
+            console.error("Error fetching users:", error);
+            setError(error.response?.data?.detail || "Failed to fetch users");
+        }
+    };
 
+    useEffect(() => {
         fetchUsersData();
     }, []);
 
@@ -99,10 +99,14 @@ const ChatPage = () => {
         }
     };
 
+    const refreshChats = () => {
+        fetchUsersData(); // Refresh the list of users/chats
+    };
+
     return (
         <div className="flex h-screen bg-[#1B4242] text-white">
             <div className="ml-20 w-1/3 border-r border-gray-700 custom-scrollbar">
-                <Chats users={users} setSelectedChat={handleChatSelection} />
+                <Chats users={users} setSelectedChat={handleChatSelection} refreshChats={refreshChats} />
                 {error && <div className="mt-4 text-red-500 text-sm">{error}</div>}
             </div>
 
