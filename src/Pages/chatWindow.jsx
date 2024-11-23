@@ -78,34 +78,36 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId }) => {
     <div className="absolute bottom-1/4 left-1/4 w-[250px] h-[250px] bg-[#1B4242] rounded-full opacity-60"></div>
   </div>
 
-  {/* Header Section */}
-  <div className="flex items-center bg-[#1B4242] p-4 shadow-md">
+{/* Header Section */}
+<div className="flex items-center justify-between bg-[#1B4242] p-4 shadow-md">
+  <div className="flex items-center">
     <img
       src={chat.image}
       alt={`${chat.name} avatar`}
       className="w-12 h-12 rounded-full object-cover mr-4 border-2 border-white shadow-sm"
     />
-    <h1 className="text-xl font-bold text-white">{chat.name}</h1>
-    <div className="ml-auto flex items-center cursor-pointer">
-      {/* Close Button */}
-      <div className="relative w-8 h-8 flex items-center justify-center">
-        <div className="absolute w-4 h-1 bg-gray-300 rounded transform rotate-45"></div>
-        <div className="absolute w-4 h-1 bg-gray-300 rounded transform rotate-135"></div>
-      </div>
+    <div>
+      <h1 className="text-xl font-bold text-white">{chat.name}</h1>
+      <p className="text-sm text-gray-300">
+        {userStatus.online
+          ? "Online"
+          : `Last seen at ${
+              userStatus.last_seen
+                ? new Date(userStatus.last_seen).toLocaleTimeString()
+                : "unknown time"
+            }`}
+      </p>
     </div>
   </div>
-
-  {/* User Status */}
-  <div className="text-gray-500 mb-4 p-2">
-    {userStatus.online ? (
-      <span>User is online</span>
-    ) : (
-      <span>
-        User was last seen at{" "}
-        {userStatus.last_seen ? new Date(userStatus.last_seen).toLocaleTimeString() : "unknown time"}
-      </span>
-    )}
+  <div className="ml-auto flex items-center cursor-pointer">
+    {/* Close Button */}
+    <div className="relative w-8 h-8 flex items-center justify-center">
+      <div className="absolute w-4 h-1 bg-gray-300 rounded transform rotate-45"></div>
+      <div className="absolute w-4 h-1 bg-gray-300 rounded transform rotate-135"></div>
+    </div>
   </div>
+</div>
+
 
   {/* Messages Section */}
   <div className="flex-grow overflow-y-auto custom-scrollbar mb-4 px-4">
