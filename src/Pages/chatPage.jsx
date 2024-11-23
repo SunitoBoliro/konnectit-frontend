@@ -1,6 +1,6 @@
-// chatPage.jsx
 import React, { useState, useEffect } from "react";
-import axios from "axios";  // Import axios
+import { fetchUsers, fetchMessages, joinChat } from "../Components/Api/chatServies";
+import { connectWebSocket } from "../Components/Api/webSocket/index";
 import Chats from "../Components/chat";
 import ChatWindow from "./chatWindow";
 
@@ -10,99 +10,78 @@ const ChatPage = () => {
     const [messages, setMessages] = useState([]);
     const [users, setUsers] = useState([]);
     const [error, setError] = useState("");
+    const [chatId, setChatId] = useState("");
+
+    localStorage.setItem("chatUser", selectedChat?.email || "");
 
     useEffect(() => {
-        // Fetch users from the backend
-        const fetchUsers = async () => {
+        const fetchUsersData = async () => {
             try {
                 const token = localStorage.getItem("token");
-                if (!token) {
-                    throw new Error("Token not found in local storage");
-                }
-                const response = await axios.get("http://localhost:8000/users", {
-                    params: { token: encodeURIComponent(token) }
-                });
-                setUsers(response.data);
+                if (!token) throw new Error("Token not found in local storage");
+                const data = await fetchUsers(token);
+                setUsers(data);
             } catch (error) {
                 console.error("Error fetching users:", error);
-                if (error.response && error.response.data && error.response.data.detail) {
-                    setError(error.response.data.detail);
-                } else {
-                    setError("Failed to fetch users");
-                }
+                setError(error.response?.data?.detail || "Failed to fetch users");
             }
         };
 
-        fetchUsers();
+        fetchUsersData();
     }, []);
 
     useEffect(() => {
-        // Assuming you have a token stored in local storage
         const token = localStorage.getItem("token");
-        if (token) {
-            console.log("Token from local storage:", token);
-            const ws = new WebSocket(`ws://localhost:8000/ws/${encodeURIComponent(token)}`);
-
-            ws.onopen = () => {
-                console.log("Connected to WebSocket server");
-            };
-
-            ws.onmessage = (event) => {
-                const message = JSON.parse(event.data);
-                console.log("Received message:", message);
-                // Handle incoming messages here
-                setMessages((prevMessages) => [...prevMessages, message]);
-            };
-
-            ws.onclose = () => {
-                console.log("Disconnected from WebSocket server");
-            };
-
-            ws.onerror = (error) => {
-                console.error("WebSocket error:", error);
-                setError("WebSocket error");
-            };
-
-            setWebSocket(ws);
-
-            return () => {
-                ws.close();
-            };
+        if (!token) {
+            setError("Token not found in local storage");
+            return;
         }
+
+        const onMessage = (message) => {
+            setMessages((prevMessages) => [...prevMessages, message]);
+        };
+
+        const onError = (errorMessage) => {
+            setError(errorMessage);
+        };
+
+        const onClose = () => {
+            console.error("WebSocket closed.");
+        };
+
+        const ws = connectWebSocket(token, onMessage, onError, onClose);
+        setWebSocket(ws);
+
+        // Cleanup WebSocket connection
+        return () => {
+            if (ws) ws.close();
+        };
     }, []);
 
     useEffect(() => {
         if (selectedChat) {
-            fetchMessages(selectedChat.email);
+            fetchMessagesData(selectedChat.email);
         }
     }, [selectedChat]);
 
-    const fetchMessages = async (chatId) => {
+    const fetchMessagesData = async (chatId) => {
         try {
             const token = localStorage.getItem("token");
-            console.log("Fetching messages with token:", token);
-            const response = await axios.get(`http://localhost:8000/messages/${chatId}`, {
-                params: { token: encodeURIComponent(token) }
-            });
-            setMessages(response.data);
-            console.log(response.data);
+            const sender = localStorage.getItem("currentLoggedInUser");
+            const data = await fetchMessages(chatId, sender, token);
+            setMessages(data);
         } catch (error) {
             console.error("Error fetching messages:", error);
-            if (error.response && error.response.data && error.response.data.detail) {
-                setError(error.response.data.detail);
-            } else {
-                setError("Failed to fetch messages");
-            }
+            setError(error.response?.data?.detail || "Failed to fetch messages");
         }
     };
 
     const handleChatSelection = async (user) => {
-        // Create a new chat or select an existing one
-        const chatId = user.email; // Create a new chat ID using timestamp
+        const chatId = user.email;
+        setChatId(chatId);
 
-        // Add chatId to the current user's chats
         const token = localStorage.getItem("token");
-        const userId = localStorage.getItem("userId");
+        const userId = localStorage.getItem("currentLoggedInUser");
 
         if (!token || !userId) {
             setError("Token or User ID not found in local storage");
@@ -110,50 +89,34 @@ const ChatPage = () => {
         }
 
         try {
-            // Create a chat and add both users to it
-            const response = await axios.post(`http://localhost:8000/chats/${userId}/join`, {
-                chatId: chatId,
-                other_user_id: user.id
-            }, {
-                params: { token: encodeURIComponent(token) }
-            });
-
-            const createdChatId = response.data.chatId;
-            setSelectedChat({ id: createdChatId, name: user.username, email: user.email });
-            setMessages([]); // Clear messages for the new chat
+            const data = await joinChat(userId, chatId, token);
+            const createdChatId = data.chatId;
+            setSelectedChat({ chatId: createdChatId, name: user.username, email: user.email });
+            setMessages([]); // Clear previous messages when a new chat is selected
         } catch (error) {
             console.error("Error creating chat:", error);
-            if (error.response && error.response.data && error.response.data.detail) {
-                setError(error.response.data.detail);
-            } else {
-                setError("Failed to create chat");
-            }
+            setError(error.response?.data?.detail || "Failed to create chat");
         }
     };
 
     return (
-        <div className="flex h-screen bg-gray-900 text-white">
-            {/* Chats List */}
-            <div className="ml-20 w-1/3 border-r border-gray-700">
+        <div className="flex h-screen bg-[#1B4242] text-white">
+            <div className="ml-20 w-1/3 border-r border-gray-700 custom-scrollbar">
                 <Chats users={users} setSelectedChat={handleChatSelection} />
-                {error && (
-                    <div className="mt-4 text-red-500 text-sm">
-                        {error}
-                    </div>
-                )}
+                {error && <div className="mt-4 text-red-500 text-sm">{error}</div>}
             </div>
 
-            {/* Chat Window */}
-            <div className="w-2/3">
+            <div className="w-2/3 flex flex-col">
                 {selectedChat ? (
                     <ChatWindow
                         chat={selectedChat}
                         webSocket={webSocket}
                         messages={messages}
                         setMessages={setMessages}
+                        chatId={chatId}
                     />
                 ) : (
-                    <div className="flex items-center justify-center h-full text-gray-500">
+                    <div className="flex items-center justify-center h-full text-white bg-[#1B4242] rounded-lg shadow-lg">
                         Select a chat to start messaging.
                     </div>
                 )}
