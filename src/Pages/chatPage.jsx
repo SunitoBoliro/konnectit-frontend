@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchUsers, fetchMessages, createOrJoinChat } from "../Components/Api/chatServies";
+import { fetchUsers, fetchMessages } from "../Components/Api/chatServies";
 import { connectWebSocket } from "../Components/Api/webSocket/index";
 import Chats from "../Components/chat";
 import ChatWindow from "./chatWindow";
