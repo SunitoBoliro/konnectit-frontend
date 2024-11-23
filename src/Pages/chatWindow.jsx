@@ -5,8 +5,8 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId }) => {
     const [newMessage, setNewMessage] = useState("");
     const [userStatus, setUserStatus] = useState({ online: false, last_seen: null });
     const userId = localStorage.getItem("userId");
-    const userEmail = localStorage.getItem("email");
-    const chatUser = sessionStorage.getItem("chatUser")
+    const userEmail = localStorage.getItem("currentLoggedInUser");
+    const chatUser = localStorage.getItem("chatUser");
     const messagesEndRef = useRef(null); // Ref to track the end of the message list
 
     // Automatically scroll to the latest message
@@ -33,30 +33,52 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId }) => {
         }
     }, [webSocket, setMessages]);
 
-    // Fetch user status from the backend
+    // Fetch initial user status from the backend
     useEffect(() => {
-        const fetchUserStatus = async () => {
+        const fetchInitialUserStatus = async () => {
             try {
                 const response = await axios.get(`http://192.168.23.109:8000/user-status/${chatUser}`);
-                console.log(response.data)
+                console.log("Initial User Status:", response.data);
                 setUserStatus(response.data);
             } catch (error) {
-                console.error("Error fetching user status:", error);
+                console.error("Error fetching initial user status:", error);
             }
         };
 
-        // Fetch status initially and then every minute
-        fetchUserStatus();
-        const interval = setInterval(fetchUserStatus, 60000);
+        fetchInitialUserStatus();
+    }, [chatUser]);
 
-        return () => clearInterval(interval);
+    // Set up SSE for real-time user status updates
+    useEffect(() => {
+        if (!chatUser) return;
+
+        const eventSource = new EventSource(`http://192.168.23.109:8000/sse/user-status/${chatUser}`);
+
+        eventSource.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                console.log('User Status Update:', data);
+                setUserStatus(data);
+            } catch (parseError) {
+                console.error('Error parsing SSE message:', parseError);
+            }
+        };
+
+        eventSource.onerror = (error) => {
+            console.error('SSE Error:', error);
+            eventSource.close();
+        };
+
+        return () => {
+            eventSource.close();
+        };
     }, [chatUser]);
 
     const sendMessage = () => {
         if (!newMessage.trim()) return;
 
         const message = {
-            chatId: chatId,
+            chatId: chatUser,
             content: newMessage,
             timestamp: new Date().toISOString(),
             sender: userEmail,

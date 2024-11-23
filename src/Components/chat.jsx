@@ -25,7 +25,8 @@ const Chats = ({ users, setSelectedChat }) => {
                             <div>
                                 <div className="font-semibold">{user.username}</div>
                                 <div className="text-sm text-gray-400">{user.email}</div>
-                                {sessionStorage.setItem("chatUser", user.email)}
+                                {/*{localStorage.removeItem("chatUser")}*/}
+                                {/*{localStorage.setItem("chatUser", user.email)}*/}
                             </div>
                         </li>
 

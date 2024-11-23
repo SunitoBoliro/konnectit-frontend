@@ -11,6 +11,7 @@ const ChatPage = () => {
     const [error, setError] = useState("");
     const [retryCount, setRetryCount] = useState(0);
     const [chatId, setChatId] = useState("")
+    localStorage.setItem("chatUser", selectedChat?.email || "");
 
     useEffect(() => {
         // Fetch users from the backend
@@ -23,6 +24,7 @@ const ChatPage = () => {
                 const response = await axios.get("http://192.168.23.109:8000/users", {
                     params: { token: encodeURIComponent(token) }
                 });
+                console.log(response.data)
                 setUsers(response.data);
             } catch (error) {
                 console.error("Error fetching users:", error);
@@ -76,7 +78,7 @@ const ChatPage = () => {
             setWebSocket(ws);
 
             return () => {
-                ws.close();
+                // ws.close();
                 // console.log("closed comment ws ion chatPage file line 80")
             };
         };
@@ -98,7 +100,7 @@ const ChatPage = () => {
     const fetchMessages = async (chatId) => {
         try {
             const token = localStorage.getItem("token");
-            const sender = localStorage.getItem("email")
+            const sender = localStorage.getItem("currentLoggedInUser")
             const response = await axios.get(`http://192.168.23.109:8000/messages/${chatId}/${sender}`, {
                 params: { token: encodeURIComponent(token) }
             });
@@ -114,7 +116,7 @@ const ChatPage = () => {
         setChatId(chatId)
 
         const token = localStorage.getItem("token");
-        const userId = localStorage.getItem("userId");
+        const userId = localStorage.getItem("currentLoggedInUser");
 
         if (!token || !userId) {
             setError("Token or User ID not found in local storage");
@@ -127,8 +129,9 @@ const ChatPage = () => {
                 { chatId },
                 { params: { token: encodeURIComponent(token) } }
             );
+            console.log(response.data)
             const createdChatId = response.data.chatId;
-            setSelectedChat({ id: createdChatId, name: user.username, email: user.email });
+            setSelectedChat({ chatId: createdChatId, name: user.username, email: user.email });
             setMessages([]);  // Clear previous messages when a new chat is selected
         } catch (error) {
             console.error("Error creating chat:", error);
@@ -163,6 +166,7 @@ const ChatPage = () => {
                     </div>
                 )}
             </div>
+            <div>{console.log(messages)}</div>
         </div>
     );
 };

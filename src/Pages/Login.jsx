@@ -15,7 +15,7 @@ const LoginPage = ({ onLogin }) => {
             onLogin(); // Set authenticated state in App
             localStorage.setItem("token", response.token);
             localStorage.setItem("userId", response.userId);
-            localStorage.setItem("userId", response.userId);
+            // localStorage.setItem("userId", response.userId);
             navigate("/", { replace: true });
         } catch (error) {
             if (error instanceof Error) {
