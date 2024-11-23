@@ -36,7 +36,7 @@ export const loginUser = async (loginData) => {
         const response = await axios.post(`${API_BASE_URL}/login`, loginData);
         const token = response.data.token;
         localStorage.setItem("token", token); // Store token on successful login
-        localStorage.setItem("email", response.data.user.email); // Store token on successful login
+        localStorage.setItem("currentLoggedInUser", response.data.user.email); // Store token on successful login
         return response.data;
     } catch (error) {
         throw error.response.data.detail;

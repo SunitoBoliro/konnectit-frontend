@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { fetchUsers, fetchMessages, joinChat } from "../Components/Api/chatServies";
+import { fetchUsers, fetchMessages, createOrJoinChat } from "../Components/Api/chatServies";
 import { connectWebSocket } from "../Components/Api/webSocket/index";
 import Chats from "../Components/chat";
 import ChatWindow from "./chatWindow";
-import "./scrollBar.css"
 
 const ChatPage = () => {
     const [selectedChat, setSelectedChat] = useState(null);
@@ -13,83 +12,100 @@ const ChatPage = () => {
     const [error, setError] = useState("");
     const [chatId, setChatId] = useState("");
 
+    localStorage.setItem("chatUser", selectedChat?.email || "");
+
     useEffect(() => {
-        const loadUsers = async () => {
+        const fetchUsersData = async () => {
             try {
-                const usersData = await fetchUsers();
-                setUsers(usersData);
+                const token = localStorage.getItem("token");
+                if (!token) throw new Error("Token not found in local storage");
+                const data = await fetchUsers(token);
+                setUsers(data);
             } catch (error) {
                 console.error("Error fetching users:", error);
-                setError(error.message || "Failed to fetch users");
+                setError(error.response?.data?.detail || "Failed to fetch users");
             }
         };
-        loadUsers();
+
+        fetchUsersData();
     }, []);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-
         if (!token) {
             setError("Token not found in local storage");
             return;
         }
 
-        const ws = connectWebSocket(
-            token,
-            (message) => setMessages((prev) => [...prev, message]),
-            (error) => setError("WebSocket error. Check server or network."),
-            () => console.error("WebSocket closed. Attempting to reconnect..."),
-            () => setError("")
-        );
+        const onMessage = (message) => {
+            setMessages((prevMessages) => [...prevMessages, message]);
+        };
 
+        const onError = (errorMessage) => {
+            setError(errorMessage);
+        };
+
+        const onClose = () => {
+            console.error("WebSocket closed.");
+        };
+
+        const ws = connectWebSocket(token, onMessage, onError, onClose);
         setWebSocket(ws);
 
+        // Cleanup WebSocket connection
         return () => {
             if (ws) ws.close();
         };
     }, []);
 
-    const handleChatSelection = async (user) => {
+    useEffect(() => {
+        if (selectedChat) {
+            fetchMessagesData(selectedChat.email);
+        }
+    }, [selectedChat]);
+
+    const fetchMessagesData = async (chatId) => {
         try {
-            const chatId = user.email;
-            setChatId(chatId);
-
-            const userId = localStorage.getItem("userId");
-            const chatData = await joinChat(userId, chatId);
-
-            setSelectedChat({ id: chatData.chatId, name: user.username, email: user.email });
-            setMessages([]); // Clear previous messages when a new chat is selected
+            const token = localStorage.getItem("token");
+            const sender = localStorage.getItem("currentLoggedInUser");
+            const data = await fetchMessages(chatId, sender, token);
+            setMessages(data);
         } catch (error) {
-            console.error("Error creating chat:", error);
-            setError(error.message || "Failed to create chat");
+            console.error("Error fetching messages:", error);
+            setError(error.response?.data?.detail || "Failed to fetch messages");
         }
     };
 
-    useEffect(() => {
-        const loadMessages = async () => {
-            if (selectedChat) {
-                try {
-                    const sender = localStorage.getItem("email");
-                    const messagesData = await fetchMessages(selectedChat.email, sender);
-                    setMessages(messagesData);
-                } catch (error) {
-                    console.error("Error fetching messages:", error);
-                    setError(error.message || "Failed to fetch messages");
-                }
-            }
-        };
-        loadMessages();
-    }, [selectedChat]);
+    const handleChatSelection = async (user) => {
+        const chatId = user.email;
+        setChatId(chatId);
+
+        const token = localStorage.getItem("token");
+        const userId = localStorage.getItem("currentLoggedInUser");
+
+        if (!token || !userId) {
+            setError("Token or User ID not found in local storage");
+            return;
+        }
+
+        try {
+            const data = await createOrJoinChat(userId, chatId, token);
+            const createdChatId = data.chatId;
+            setSelectedChat({ chatId: createdChatId, name: user.username, email: user.email });
+            setMessages([]); // Clear previous messages when a new chat is selected
+        } catch (error) {
+            console.error("Error creating chat:", error);
+            setError(error.response?.data?.detail || "Failed to create chat");
+        }
+    };
 
     return (
         <div className="flex h-screen bg-[#1B4242] text-white">
-            {/* Sidebar with Chats */}
             <div className="ml-20 w-1/3 border-r border-gray-700 custom-scrollbar">
                 <Chats users={users} setSelectedChat={handleChatSelection} />
                 {error && <div className="mt-4 text-red-500 text-sm">{error}</div>}
             </div>
 
-            {/* Chat Window */}
             <div className="w-2/3 flex flex-col">
                 {selectedChat ? (
                     <ChatWindow

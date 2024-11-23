@@ -4,15 +4,38 @@ import axios from "axios";
 const API_BASE_URL = import.meta.env.VITE_API_URL ;
 
 // Fetch User Status
-// export const fetchUserStatus = async (chatUser) => {
-//     try {
-//         const response = await axios.get(`${API_BASE_URL}/user-status/${chatUser}`);
-//         return response.data;
-//     } catch (error) {
-//         console.error("Error fetching user status:", error);
-//         throw error;
-//     }
-// };
+export const fetchUserStatus = async (chatUser) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/user-status/${chatUser}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching user status:", error);
+      throw error;
+    }
+  };
+
+
+// Set up SSE for user status updates
+export const setupSSE = (chatUser, onMessage, onError) => {
+    const eventSource = new EventSource(`${API_BASE_URL}/sse/user-status/${chatUser}`);
+  
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        onMessage(data);
+      } catch (error) {
+        console.error("Error parsing SSE message:", error);
+      }
+    };
+  
+    eventSource.onerror = (error) => {
+      console.error("SSE error:", error);
+      onError(error);
+      eventSource.close();
+    };
+  
+    return eventSource; // Return the instance to allow manual closure
+  };
 
 // Add more API functions as needed
 const getToken = () => localStorage.getItem("token");

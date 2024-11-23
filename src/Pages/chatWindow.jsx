@@ -1,73 +1,75 @@
 import React, { useState, useEffect, useRef } from "react";
-// import { fetchUserStatus } from "../Components/Api/chatServies.js";
-import "./scrollBar.css"
-import { LuSendHorizonal } from "react-icons/lu";
-
+import { fetchUserStatus, setupSSE } from "../Components/Api/chatServies";
 
 const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId }) => {
-    const [newMessage, setNewMessage] = useState("");
-    const [userStatus, setUserStatus] = useState({ online: false, last_seen: null });
-    const userId = localStorage.getItem("userId");
-    const userEmail = localStorage.getItem("email");
-    const chatUser = sessionStorage.getItem("chatUser");
-    const messagesEndRef = useRef(null);
+  const [newMessage, setNewMessage] = useState("");
+  const [userStatus, setUserStatus] = useState({ online: false, last_seen: null });
+  const userId = localStorage.getItem("userId");
+  const userEmail = localStorage.getItem("currentLoggedInUser");
+  const chatUser = localStorage.getItem("chatUser");
+  const messagesEndRef = useRef(null);
 
-    // Scroll to latest message
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(() => {
+    if (webSocket) {
+      webSocket.onmessage = (event) => {
+        const receivedMessage = JSON.parse(event.data);
+        if (receivedMessage.sender !== userEmail) {
+          setMessages((prev) => [...prev, receivedMessage]);
+        }
+      };
+    }
+  }, [webSocket, setMessages]);
+
+  useEffect(() => {
+    const getUserStatus = async () => {
+      try {
+        const status = await fetchUserStatus(chatUser);
+        setUserStatus(status);
+      } catch (error) {
+        console.error(error);
+      }
     };
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+    getUserStatus();
+  }, [chatUser]);
 
-    useEffect(() => {
-        if (webSocket) {
-            webSocket.onmessage = (event) => {
-                const receivedMessage = JSON.parse(event.data);
-                if (receivedMessage.sender !== userEmail) {
-                    setMessages((prev) => [...prev, receivedMessage]);
-                }
-            };
-        }
-    }, [webSocket, setMessages]);
+  useEffect(() => {
+    if (!chatUser) return;
 
-    // Fetch user status
-    // useEffect(() => {
-    //     const fetchStatus = async () => {
-    //         try {
-    //             const status = await fetchUserStatus(chatUser); // Use the service function
-    //             setUserStatus(status);
-    //         } catch (error) {
-    //             console.error(error);
-    //         }
-    //     };
+    const handleMessage = (data) => setUserStatus(data);
+    const handleError = (error) => console.error("SSE Error:", error);
 
-    //     fetchStatus();
-    //     const interval = setInterval(fetchStatus, 60000);
-    //     return () => clearInterval(interval);
-    // }, [chatUser]);
+    const eventSource = setupSSE(chatUser, handleMessage, handleError);
 
-    const sendMessage = () => {
-        if (!newMessage.trim()) return;
+    return () => eventSource.close();
+  }, [chatUser]);
 
-        const message = {
-            chatId: chatId,
-            content: newMessage,
-            timestamp: new Date().toISOString(),
-            sender: userEmail,
-        };
+  const sendMessage = () => {
+    if (!newMessage.trim()) return;
 
-        if (webSocket?.readyState === WebSocket.OPEN) {
-            webSocket.send(JSON.stringify(message));
-            setMessages((prev) => [...prev, message]);
-            setNewMessage("");
-        } else {
-            console.error("WebSocket is not open");
-        }
+    const message = {
+      chatId: chatUser,
+      content: newMessage,
+      timestamp: new Date().toISOString(),
+      sender: userEmail,
     };
 
-    return (
+    if (webSocket?.readyState === WebSocket.OPEN) {
+      webSocket.send(JSON.stringify(message));
+      setMessages((prev) => [...prev, message]);
+      setNewMessage("");
+    } else {
+      console.error("WebSocket is not open");
+    }
+  };       return (
         <div className="bg-[#B1C381] h-screen flex flex-col">
   {/* Shapes Background */}
   <div className="absolute inset-0 z-[-1]">
