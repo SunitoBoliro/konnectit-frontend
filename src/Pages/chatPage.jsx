@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchUsers, fetchMessages } from "../Components/Api/chatServies";
+import { fetchUsers, fetchMessages, joinChat } from "../Components/Api/chatServies";
 import { connectWebSocket } from "../Components/Api/webSocket/index";
 import Chats from "../Components/chat";
 import ChatWindow from "./chatWindow";
@@ -89,7 +89,7 @@ const ChatPage = () => {
         }
 
         try {
-            const data = await createOrJoinChat(userId, chatId, token);
+            const data = await joinChat(userId, chatId, token);
             const createdChatId = data.chatId;
             setSelectedChat({ chatId: createdChatId, name: user.username, email: user.email });
             setMessages([]); // Clear previous messages when a new chat is selected
