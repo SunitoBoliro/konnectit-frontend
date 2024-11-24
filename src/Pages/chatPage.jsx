@@ -3,6 +3,8 @@ import { fetchUsers, fetchMessages, joinChat } from "../Components/Api/chatServi
 import { connectWebSocket } from "../Components/Api/webSocket/index";
 import Chats from "../Components/chat";
 import ChatWindow from "./chatWindow";
+// import CallModal from "./CallModal"; // Import the CallModal component
+import CallModal from "../Components/callModal.jsx"
 
 const ChatPage = () => {
     const [selectedChat, setSelectedChat] = useState(null);
@@ -11,6 +13,7 @@ const ChatPage = () => {
     const [users, setUsers] = useState([]);
     const [error, setError] = useState("");
     const [chatId, setChatId] = useState("");
+    const [isCallModalOpen, setIsCallModalOpen] = useState(false); // State to control the call modal
 
     localStorage.setItem("chatUser", selectedChat?.email || "");
 
@@ -103,6 +106,10 @@ const ChatPage = () => {
         fetchUsersData(); // Refresh the list of users/chats
     };
 
+    const handleCallInitiation = () => {
+        setIsCallModalOpen(true);
+    };
+
     return (
         <div className="flex h-screen bg-[#1B4242] text-white">
             <div className="ml-20 w-1/3 border-r border-gray-700 custom-scrollbar">
@@ -118,6 +125,7 @@ const ChatPage = () => {
                         messages={messages}
                         setMessages={setMessages}
                         chatId={chatId}
+                        handleCallInitiation={handleCallInitiation} // Pass the handleCallInitiation function to ChatWindow
                     />
                 ) : (
                     <div className="flex items-center justify-center h-full text-white bg-[#1B4242] rounded-lg shadow-lg">
@@ -125,6 +133,15 @@ const ChatPage = () => {
                     </div>
                 )}
             </div>
+
+            {/* Render the CallModal component if it's open */}
+            {isCallModalOpen && (
+                <CallModal
+                    chatUser={selectedChat?.email}
+                    currentLoggedInUser = {localStorage.getItem("currentLoggedInUser")}
+                    onClose={() => setIsCallModalOpen(false)}
+                />
+            )}
         </div>
     );
 };

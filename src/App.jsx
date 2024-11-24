@@ -44,13 +44,13 @@ export default function App() {
     const handleLogout = async () => {
         setIsAuthenticated(false);
         const userEmail = localStorage.getItem("currentLoggedInUser");
-        await axios.post(`http://192.168.23.109:8000/logout/${userEmail}`);
         localStorage.removeItem("token"); // Remove token on logout
+        navigate("/login", {replace: true}); // Redirect to login page
         localStorage.removeItem("userId")
         localStorage.removeItem("currentLoggedInUser")
         localStorage.removeItem("chatUser")
+        await axios.post(`http://192.168.23.109:8000/logout/${userEmail}`);
 
-        navigate("/login", {replace: true}); // Redirect to login page
     };
 
     return (

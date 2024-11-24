@@ -15,6 +15,7 @@ export const fetchUserStatus = async (chatUser) => {
   };
 
 
+
 // Set up SSE for user status updates
 export const setupSSE = (chatUser, onMessage, onError) => {
     const eventSource = new EventSource(`${API_BASE_URL}/sse/user-status/${chatUser}`);
@@ -69,3 +70,12 @@ export const joinChat = async (userId, chatId) => {
     );
     return response.data;
 };
+
+export const joinRoom = async (userId, chatId) => {
+    const token = getToken();  // Get token (if necessary)
+    if (!token) throw new Error("Token not found in local storage");
+    const response = await axios.get(`${API_BASE_URL}/room/${userId}/${chatId}`, {
+        params: { token: encodeURIComponent(token) },
+    });
+    return response.data;
+}

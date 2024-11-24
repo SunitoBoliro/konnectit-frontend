@@ -7,6 +7,7 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [email, setEmail] = useState("");
+  const [details, setDetails] = useState(null)
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -23,6 +24,7 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
 
     try {
       const response = await joinChat(userId, email, token);
+      setDetails(response.detail)
       if (response.detail === "Chat joined successfully") {
         refreshChats(); // Refresh chat list after successful addition
       } else {
@@ -121,7 +123,7 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
             <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
               <div className="bg-[#1B4242] p-6 rounded-lg shadow-2xl w-80">
                 <h2 className="text-xl font-semibold text-white mb-4 text-center">Error</h2>
-                <p className="text-white text-center mb-6">User Not Found</p>
+                <p className="text-white text-center mb-6">{`${details === "User already in chat" ? "User Already in Chat!" : 'User Not Found!'}`}</p>
                 <div className="flex justify-center">
                   <button
                       onClick={() => setIsErrorModalOpen(false)}
