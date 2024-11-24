@@ -3,6 +3,8 @@ import { fetchUserStatus, setupSSE } from "../Components/Api/chatServies";
 import {MdDelete, MdOutlineAddIcCall, MdSend} from "react-icons/md";
 import { FiSend } from "react-icons/fi";
 import {BsFillMicFill, BsFillMicMuteFill, BsFillStopFill} from "react-icons/bs";
+import { BsEmojiSmile } from "react-icons/bs";
+import EmojiPicker from 'emoji-picker-react';
 
 const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCallInitiation }) => {
   const [newMessage, setNewMessage] = useState("");
@@ -12,12 +14,15 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isAudioReady, setIsAudioReady] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
 
   const userId = localStorage.getItem("userId");
   const userEmail = localStorage.getItem("currentLoggedInUser");
   const chatUser = localStorage.getItem("chatUser");
   const messagesEndRef = useRef(null);
   const timerRef = useRef(null);
+  const emojiPickerRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -50,6 +55,22 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
 
     getUserStatus();
   }, [chatUser]);
+  const handleEmojiClick = (emojiObject) => {
+    setNewMessage((prevMessage) => prevMessage + emojiObject.emoji);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (!chatUser) return;
@@ -239,16 +260,24 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
         </div>
 
         {/* Sender Area */}
-        <div className="flex items-center gap-2 p-4 bg-[#40414F] border-t border-gray-700">
+        <div className="flex items-center gap-2 p-4 bg-[#40414F] border-t border-gray-700 relative">
           {!isRecording && !isAudioReady && (
               <>
-                <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type a message"
-                    className="w-full p-3 rounded-lg bg-[#5C8374] text-white placeholder-gray-300 focus:ring-2 focus:ring-[#9EC8B9] focus:outline-none"
-                />
+                <div className="relative flex-grow">
+                  <input
+                      type="text"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="Type a message"
+                      className="w-full p-3 pr-10 rounded-lg bg-[#5C8374] text-white placeholder-gray-300 focus:ring-2 focus:ring-[#9EC8B9] focus:outline-none"
+                  />
+                  <button
+                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white transition duration-300"
+                  >
+                    <BsEmojiSmile size={20} />
+                  </button>
+                </div>
                 <button
                     onClick={sendMessage}
                     className="flex items-center justify-center p-3 bg-gradient-to-r from-[#1B4242] to-[#5C8374] text-white rounded-lg shadow-md hover:opacity-90 transition duration-300"
@@ -311,10 +340,19 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
                 </div>
               </div>
           )}
+          {showEmojiPicker && (
+              <div
+                  ref={emojiPickerRef}
+                  className="absolute bottom-full left-2 mb-2"
+              >
+                <EmojiPicker onEmojiClick={handleEmojiClick} />
+              </div>
+          )}
         </div>
       </div>
   );
 };
+
 
 
 export default ChatWindow;
