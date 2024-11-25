@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { MdPersonAddAlt } from "react-icons/md";
 import { joinChat } from "./Api/chatServies.js";
+import pp from "../assets/img.png"
 
 const Chats = ({ users, setSelectedChat, refreshChats }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -72,7 +73,7 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
                         className="flex items-center p-3 rounded-lg hover:bg-[#9EC8B9] cursor-pointer"
                     >
                       <img
-                          src="https://placehold.co/40x40"
+                          src={pp}
                           alt={user.username}
                           className="w-10 h-10 rounded-full mr-3"
                       />
