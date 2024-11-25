@@ -21,6 +21,8 @@ export const validateToken = async (token) => {
 };
 
 // Register a new user
+
+
 export const registerUser = async (userData) => {
     try {
         const response = await axios.post(`${API_BASE_URL}/register`, userData);
@@ -29,6 +31,7 @@ export const registerUser = async (userData) => {
         throw error.response.data.detail;
     }
 };
+
 
 // Login user
 export const loginUser = async (loginData) => {

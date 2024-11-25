@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../Components/Api/authService";
-import "./home.css"
+import "./home.css";
 
 const Registration = () => {
     const navigate = useNavigate();
@@ -9,10 +9,29 @@ const Registration = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [image, setImage] = useState(null); // State to hold the Base64 image
+
+    // Handle the image input change (convert to Base64)
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImage(reader.result); // Set the Base64 string
+            };
+            reader.readAsDataURL(file); // Convert image to Base64
+        }
+    };
 
     const handleRegister = async () => {
         try {
-            await registerUser({ username: name, email, password });
+            const userData = {
+                username: name,
+                email,
+                password,
+                pp: image // Include the Base64 string of the profile picture
+            };
+            await registerUser(userData);
             alert("Registration successful! Please login.");
             navigate("/login");
         } catch (error) {
@@ -56,6 +75,15 @@ const Registration = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="w-full p-3 bg-gray-800 border border-teal-500 rounded focus:outline-none focus:border-green-400 text-white"
+                    />
+                </div>
+
+                <div className="mb-4">
+                    <label className="block text-teal-300 text-sm font-semibold mb-2">Profile Picture</label>
+                    <input
+                        type="file"
+                        onChange={handleImageChange}
+                        className="w-full p-3 bg-gray-800 border border-teal-500 rounded focus:outline-none text-white"
                     />
                 </div>
 
