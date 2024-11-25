@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { fetchUserStatus, setupSSE } from "../Components/Api/chatServies";
+import pp from "../assets/img.png"
 import {
   MdOutlineAddIcCall,
   MdDelete,
@@ -14,6 +15,7 @@ import {
 } from "react-icons/bs";
 import { FiSend } from "react-icons/fi";
 import EmojiPicker from 'emoji-picker-react';
+// import ContextMenu from "../Components/contextMenu.jsx";
 
 const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCallInitiation }) => {
   const [newMessage, setNewMessage] = useState("");
@@ -242,8 +244,8 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
         <div className="flex items-center justify-between bg-[#1B4242] p-4 shadow-md">
           <div className="flex items-center">
             <img
-                src={chat.image}
-                alt={`${chat.name} avatar`}
+                src={pp}
+                alt={`${pp} avatar`}
                 className="w-12 h-12 rounded-full object-cover mr-4 border-2 border-white shadow-sm"
             />
             <div>
