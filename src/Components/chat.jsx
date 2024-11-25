@@ -41,7 +41,7 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
   return (
       <div className="relative">
         {/* Fixed Header Section */}
-        <div className="fixed top-0 left-18 w-[30.5vw] bg-[#1B4242] z-10 p-4 shadow-md">
+        <div className="fixed top-0 left-18 w-[30.5vw] bg-[#1B4242]  p-4 shadow-md">
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-bold text-white">Chats</h1>
             {/* Add User Icon */}
