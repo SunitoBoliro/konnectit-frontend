@@ -1,9 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { fetchUserStatus, setupSSE } from "../Components/Api/chatServies";
-import {MdDelete, MdOutlineAddIcCall, MdSend} from "react-icons/md";
+import {
+  MdOutlineAddIcCall,
+  MdDelete,
+  MdSend,
+  MdPlayArrow,
+  MdPause
+} from "react-icons/md";
+import {
+  BsFillMicFill,
+  BsFillStopFill,
+  BsEmojiSmile
+} from "react-icons/bs";
 import { FiSend } from "react-icons/fi";
-import {BsFillMicFill, BsFillMicMuteFill, BsFillStopFill} from "react-icons/bs";
-import { BsEmojiSmile } from "react-icons/bs";
 import EmojiPicker from 'emoji-picker-react';
 
 const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCallInitiation }) => {
@@ -15,7 +24,9 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [isAudioReady, setIsAudioReady] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-
+  const [isPlaying, setIsPlaying] = useState({});
+  const [currentTime, setCurrentTime] = useState({});
+  const [duration, setDuration] = useState({});
 
   const userId = localStorage.getItem("userId");
   const userEmail = localStorage.getItem("currentLoggedInUser");
@@ -23,10 +34,7 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
   const messagesEndRef = useRef(null);
   const timerRef = useRef(null);
   const emojiPickerRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const audioRefs = useRef({});
 
   useEffect(() => {
     scrollToBottom();
@@ -41,7 +49,7 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
         }
       };
     }
-  }, [webSocket, setMessages]);
+  }, [webSocket, setMessages, userEmail]);
 
   useEffect(() => {
     const getUserStatus = async () => {
@@ -55,9 +63,17 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
 
     getUserStatus();
   }, [chatUser]);
-  const handleEmojiClick = (emojiObject) => {
-    setNewMessage((prevMessage) => prevMessage + emojiObject.emoji);
-  };
+
+  useEffect(() => {
+    if (!chatUser) return;
+
+    const handleMessage = (data) => setUserStatus(data);
+    const handleError = (error) => console.error("SSE Error:", error);
+
+    const eventSource = setupSSE(chatUser, handleMessage, handleError);
+
+    return () => eventSource.close();
+  }, [chatUser]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -72,16 +88,13 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
     };
   }, []);
 
-  useEffect(() => {
-    if (!chatUser) return;
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
-    const handleMessage = (data) => setUserStatus(data);
-    const handleError = (error) => console.error("SSE Error:", error);
-
-    const eventSource = setupSSE(chatUser, handleMessage, handleError);
-
-    return () => eventSource.close();
-  }, [chatUser]);
+  const handleEmojiClick = (emojiObject) => {
+    setNewMessage((prevMessage) => prevMessage + emojiObject.emoji);
+  };
 
   const startRecording = async () => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -159,41 +172,68 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
     }
   };
 
+  const sendMessage = () => {
+    if (!newMessage.trim() && !audioBlob) return;
+
+    const message = {
+      chatId: chatUser,
+      content: newMessage.trim() || audioBlob,
+      timestamp: new Date().toISOString(),
+      sender: userEmail,
+      type: newMessage.trim() ? "text" : "audio",
+      format: audioBlob ? "base64" : undefined,
+    };
+
+    if (webSocket?.readyState === WebSocket.OPEN) {
+      webSocket.send(JSON.stringify(message));
+      setMessages((prev) => [...prev, message]);
+      setNewMessage("");
+      setAudioBlob(null);
+    } else {
+      console.error("WebSocket is not open");
+    }
+  };
+
+  const convertBlobToBase64 = (blob) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(",")[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
   const formatDuration = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const convertBlobToBase64 = (blob) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result.split(",")[1]); // Extract Base64 string
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+  const handlePlayPause = (index) => {
+    if (audioRefs.current[index]) {
+      if (isPlaying[index]) {
+        audioRefs.current[index].pause();
+      } else {
+        audioRefs.current[index].play();
+      }
+      setIsPlaying((prev) => ({ ...prev, [index]: !prev[index] }));
+    }
   };
 
-  const sendMessage = () => {
-    if (!newMessage.trim() && !audioBlob) return;
-
-    const message = {
-      chatId: chatUser,
-      content: newMessage.trim() || audioBlob, // Send message or audio (if recorded)
-      timestamp: new Date().toISOString(),
-      sender: userEmail,
-      type: newMessage.trim() ? "text" : "audio", // Use "audio" if no text
-      format: audioBlob ? "base64" : undefined, // Include format if it's an audio
-    };
-
-    if (webSocket?.readyState === WebSocket.OPEN) {
-      webSocket.send(JSON.stringify(message));
-      setMessages((prev) => [...prev, message]);
-      setNewMessage(""); // Reset text message input
-      setAudioBlob(null); // Clear audio after sending
-    } else {
-      console.error("WebSocket is not open");
+  const handleTimeUpdate = (index) => {
+    if (audioRefs.current[index]) {
+      setCurrentTime((prev) => ({ ...prev, [index]: audioRefs.current[index].currentTime }));
     }
+  };
+
+  const handleLoadedMetadata = (index) => {
+    if (audioRefs.current[index]) {
+      setDuration((prev) => ({ ...prev, [index]: audioRefs.current[index].duration }));
+    }
+  };
+
+  const handleAudioEnded = (index) => {
+    setIsPlaying((prev) => ({ ...prev, [index]: false }));
   };
 
   return (
@@ -233,19 +273,39 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
                         className={`flex ${msg.sender === userEmail ? "justify-end" : "justify-start"}`}
                     >
                       {msg.type === "audio" ? (
-                          <audio
-                              controls
-                              src={`data:audio/webm;base64,${msg.content}`}
-                              className="rounded-lg"
-                          ></audio>
+                          <div className={`p-2 rounded-lg ${msg.sender === userEmail ? "bg-[#DCF8C6]" : "bg-white"}`}>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                  onClick={() => handlePlayPause(index)}
+                                  className="text-[#075E54] hover:text-[#128C7E] transition-colors"
+                              >
+                                {isPlaying[index] ? <MdPause size={24} /> : <MdPlayArrow size={24} />}
+                              </button>
+                              <div className="w-48 h-1 bg-[#075E54] rounded-full">
+                                <div
+                                    className="h-full bg-[#128C7E] rounded-full"
+                                    style={{ width: `(currentTime[index] / duration[index]) * 100}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-xs text-[#075E54]">
+                        {formatDuration(Math.floor(currentTime[index] || 0))}
+                      </span>
+                            </div>
+                            <audio
+                                ref={(ref) => (audioRefs.current[index] = ref)}
+                                src={`data:audio/webm;base64,${msg.content}`}
+                                onTimeUpdate={() => handleTimeUpdate(index)}
+                                onLoadedMetadata={() => handleLoadedMetadata(index)}
+                                onEnded={() => handleAudioEnded(index)}
+                                className="hidden"
+                            ></audio>
+                          </div>
                       ) : (
                           <div
-                              className={`p-2 max-w-[70%] rounded-lg ${
-                                  msg.sender === userEmail ? "bg-[#5C8374]" : "bg-[#5C8374]/60"
-                              }`}
+                              className={`p-2 max-w-[70%] rounded-lg ${msg.sender === userEmail ? "bg-[#DCF8C6]" : "bg-white"}`}
                           >
-                            <p className="text-white">{msg.content}</p>
-                            <small className="text-xs text-gray-200">
+                            <p className="text-[#075E54]">{msg.content}</p>
+                            <small className="text-xs text-[#128C7E]">
                               {new Date(msg.timestamp).toLocaleTimeString()}
                             </small>
                           </div>
@@ -260,7 +320,7 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
         </div>
 
         {/* Sender Area */}
-        <div className="flex items-center gap-2 p-4 bg-[#40414F] border-t border-gray-700 relative">
+        <div className="flex items-center gap-2 p-4 bg-[#F0F2F5] border-t border-gray-300 relative">
           {!isRecording && !isAudioReady && (
               <>
                 <div className="relative flex-grow">
@@ -269,45 +329,45 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       placeholder="Type a message"
-                      className="w-full p-3 pr-10 rounded-lg bg-[#5C8374] text-white placeholder-gray-300 focus:ring-2 focus:ring-[#9EC8B9] focus:outline-none"
+                      className="w-full p-3 pr-10 rounded-full bg-white text-[#075E54] placeholder-[#128C7E] focus:ring-2 focus:ring-[#128C7E] focus:outline-none"
                   />
                   <button
                       onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white transition duration-300"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#128C7E] hover:text-[#075E54] transition duration-300"
                   >
                     <BsEmojiSmile size={20} />
                   </button>
                 </div>
                 <button
                     onClick={sendMessage}
-                    className="flex items-center justify-center p-3 bg-gradient-to-r from-[#1B4242] to-[#5C8374] text-white rounded-lg shadow-md hover:opacity-90 transition duration-300"
+                    className="flex items-center justify-center p-3 bg-[#128C7E] text-white rounded-full shadow-md hover:bg-[#075E54] transition duration-300"
                 >
                   <FiSend className="text-lg" />
                 </button>
                 <button
                     onClick={startRecording}
-                    className="p-3 rounded-full bg-green-600 text-white"
+                    className="p-3 rounded-full bg-[#128C7E] text-white hover:bg-[#075E54] transition duration-300"
                 >
                   <BsFillMicFill />
                 </button>
               </>
           )}
           {isRecording && (
-              <div className="flex items-center justify-between w-full bg-[#5C8374] p-3 rounded-lg">
+              <div className="flex items-center justify-between w-full bg-white p-3 rounded-full">
                 <div className="flex items-center">
                   <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse mr-2"></div>
-                  <span className="text-white">{formatDuration(recordingDuration)}</span>
+                  <span className="text-[#075E54]">{formatDuration(recordingDuration)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                       onClick={cancelRecording}
-                      className="text-white hover:text-red-500 transition duration-300"
+                      className="text-[#075E54] hover:text-red-500 transition duration-300"
                   >
                     <MdDelete size={24} />
                   </button>
                   <button
                       onClick={stopRecording}
-                      className="text-white hover:text-yellow-500 transition duration-300"
+                      className="text-[#075E54] hover:text-[#128C7E] transition duration-300"
                   >
                     <BsFillStopFill size={24} />
                   </button>
@@ -315,25 +375,37 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
               </div>
           )}
           {isAudioReady && (
-              <div className="flex items-center justify-between w-full bg-[#5C8374] p-3 rounded-lg">
-                <audio
-                    controls
-                    src={`data:audio/webm;base64,${audioBlob}`}
-                    className="w-64"
-                />
+              <div className="flex items-center justify-between w-full bg-white p-3 rounded-full">
+                <div className="flex items-center space-x-2 flex-grow">
+                  <button
+                      onClick={handlePlayPause}
+                      className="text-[#075E54] hover:text-[#128C7E] transition-colors"
+                  >
+                    {isPlaying[0] ? <MdPause size={24} /> : <MdPlayArrow size={24} />}
+                  </button>
+                  <div className="w-48 h-1 bg-[#075E54] rounded-full">
+                    <div
+                        className="h-full bg-[#128C7E] rounded-full"
+                        style={{ width: `(currentTime[0] / duration[0]) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-xs text-[#075E54]">
+                {formatDuration(Math.floor(currentTime[0] || 0))}
+              </span>
+                </div>
                 <div className="flex items-center gap-2">
                   <button
                       onClick={() => {
                         setAudioBlob(null);
                         setIsAudioReady(false);
                       }}
-                      className="text-white hover:text-red-500 transition duration-300"
+                      className="text-[#075E54] hover:text-red-500 transition duration-300"
                   >
                     <MdDelete size={24} />
                   </button>
                   <button
                       onClick={sendAudioMessage}
-                      className="text-white hover:text-green-500 transition duration-300"
+                      className="text-[#075E54] hover:text-[#128C7E] transition duration-300"
                   >
                     <MdSend size={24} />
                   </button>
@@ -343,7 +415,7 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
           {showEmojiPicker && (
               <div
                   ref={emojiPickerRef}
-                  className="absolute bottom-full left-2 mb-2"
+                  className="absolute bottom-full left-0 mb-2"
               >
                 <EmojiPicker onEmojiClick={handleEmojiClick} />
               </div>
@@ -353,6 +425,5 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
   );
 };
 
-
-
 export default ChatWindow;
+
