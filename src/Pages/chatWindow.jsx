@@ -16,6 +16,7 @@ import {
 import { FiSend } from "react-icons/fi";
 import EmojiPicker from 'emoji-picker-react';
 // import ContextMenu from "../Components/contextMenu.jsx";
+import UserModal from "../Components/UserInfoModal";
 
 const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCallInitiation }) => {
   const [newMessage, setNewMessage] = useState("");
@@ -37,6 +38,25 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
   const timerRef = useRef(null);
   const emojiPickerRef = useRef(null);
   const audioRefs = useRef({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [user, setUser] = useState({
+    name: "John Doe",
+    email: "johndoe@example.com",
+    avatar: "https://via.placeholder.com/150", // Default avatar
+  });
+
+  const handleAvatarClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleUpdateAvatar = (newAvatar) => {
+    setUser((prev) => ({ ...prev, avatar: newAvatar }));
+  };
+
 
   useEffect(() => {
     scrollToBottom();
@@ -243,11 +263,18 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
         {/* Header Section */}
         <div className="flex items-center justify-between bg-[#1B4242] p-4 shadow-md">
           <div className="flex items-center">
-            <img
-                src={pp}
-                alt={`${pp} avatar`}
-                className="w-12 h-12 rounded-full object-cover mr-4 border-2 border-white shadow-sm"
-            />
+          <img
+        src={user.avatar}
+        alt={`${user.name}'s avatar`}
+        className="w-12 h-12 rounded-full object-cover mr-4 border-2 border-white shadow-sm cursor-pointer"
+        onClick={handleAvatarClick}
+      />
+      <UserModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        user={user}
+        onUpdateAvatar={handleUpdateAvatar}
+      />
             <div>
               <h1 className="text-xl font-bold text-white">{chat.name}</h1>
               <p className="text-sm text-gray-300">
