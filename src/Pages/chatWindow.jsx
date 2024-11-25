@@ -266,60 +266,74 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
         </div>
 
         {/* Messages Section */}
-        <div className="flex-grow overflow-y-auto custom-scrollbar mb-4 px-4">
-          {messages.length > 0 ? (
-              <ul className="space-y-2">
-                {messages.map((msg, index) => (
-                    <li
-                        key={index}
-                        className={`flex ${msg.sender === userEmail ? "justify-end" : "justify-start"}`}
-                    >
-                      {msg.type === "audio" ? (
-                          <div className={`p-2 rounded-lg ${msg.sender === userEmail ? "bg-[#DCF8C6]" : "bg-white"}`}>
-                            <div className="flex items-center space-x-2">
-                              <button
-                                  onClick={() => handlePlayPause(index)}
-                                  className="text-[#075E54] hover:text-[#128C7E] transition-colors"
-                              >
-                                {isPlaying[index] ? <MdPause size={24} /> : <MdPlayArrow size={24} />}
-                              </button>
-                              <div className="w-48 h-1 bg-[#075E54] rounded-full">
-                                <div
-                                    className="h-full bg-[#128C7E] rounded-full"
-                                    style={{ width: `(currentTime[index] / duration[index]) * 100}%` }}
-                                ></div>
-                              </div>
-                              <span className="text-xs text-[#075E54]">
-                        {formatDuration(Math.floor(currentTime[index] || 0))}
-                      </span>
-                            </div>
-                            <audio
-                                ref={(ref) => (audioRefs.current[index] = ref)}
-                                src={`data:audio/webm;base64,${msg.content}`}
-                                onTimeUpdate={() => handleTimeUpdate(index)}
-                                onLoadedMetadata={() => handleLoadedMetadata(index)}
-                                onEnded={() => handleAudioEnded(index)}
-                                className="hidden"
-                            ></audio>
-                          </div>
-                      ) : (
-                          <div
-                              className={`p-2 max-w-[70%] rounded-lg ${msg.sender === userEmail ? "bg-[#DCF8C6]" : "bg-white"}`}
-                          >
-                            <p className="text-[#075E54]">{msg.content}</p>
-                            <small className="text-xs text-[#128C7E]">
-                              {new Date(msg.timestamp).toLocaleTimeString()}
-                            </small>
-                          </div>
-                      )}
-                    </li>
-                ))}
-                <div ref={messagesEndRef} />
-              </ul>
+        <div className="flex-grow overflow-y-auto custom-scrollbar mt-4 mb-4 px-4">
+  {messages.length > 0 ? (
+    <ul className="space-y-4">
+      {messages.map((msg, index) => (
+        <li
+          key={index}
+          className={`flex ${msg.sender === userEmail ? "justify-end" : "justify-start"}`}
+        >
+          {msg.type === "audio" ? (
+            <div
+              className={`p-3 rounded-2xl shadow-md border ${
+                msg.sender === userEmail ? "bg-[#DCF8C6] border-[#A1D6B3]" : "bg-white border-gray-200"
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => handlePlayPause(index)}
+                  className="text-[#075E54] hover:text-[#128C7E] transition-all focus:outline-none"
+                >
+                  {isPlaying[index] ? <MdPause size={24} /> : <MdPlayArrow size={24} />}
+                </button>
+                <div className="w-48 h-1 bg-gray-300 rounded-full relative">
+                  <div
+                    className="h-full bg-[#128C7E] rounded-full absolute top-0 left-0"
+                    style={{ width: `${(currentTime[index] / duration[index]) * 100}%` }}
+                  ></div>
+                </div>
+                <span className="text-xs font-semibold text-[#075E54]">
+                  {formatDuration(Math.floor(currentTime[index] || 0))}
+                </span>
+              </div>
+              <audio
+                ref={(ref) => (audioRefs.current[index] = ref)}
+                src={`data:audio/webm;base64,${msg.content}`}
+                onTimeUpdate={() => handleTimeUpdate(index)}
+                onLoadedMetadata={() => handleLoadedMetadata(index)}
+                onEnded={() => handleAudioEnded(index)}
+                className="hidden"
+              ></audio>
+            </div>
           ) : (
-              <div className="text-gray-500 text-center">No messages yet</div>
+            <div
+              className={`p-4 max-w-[70%] rounded-2xl shadow-md ${
+                msg.sender === userEmail
+                  ? "bg-[#DCF8C6] border border-[#A1D6B3]"
+                  : "bg-white border border-gray-200"
+              }`}
+            >
+              <p className="text-sm text-[#075E54] break-words">{msg.content}</p>
+              <div className="text-right mt-2">
+                <small className="text-xs text-gray-500">
+                  {new Date(msg.timestamp).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </small>
+              </div>
+            </div>
           )}
-        </div>
+        </li>
+      ))}
+      <div ref={messagesEndRef} />
+    </ul>
+  ) : (
+    <div className="text-gray-500 text-center">No messages yet</div>
+  )}
+</div>
+
 
         {/* Sender Area */}
         <div className="flex items-center gap-2 p-4 bg-[#F0F2F5] border-t border-gray-300 relative">
