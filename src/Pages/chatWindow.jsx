@@ -41,7 +41,7 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [user, setUser] = useState({
     name: "John Doe",
-    email: "johndoe@example.com",
+    email: chatUser,
     avatar: "https://via.placeholder.com/150", // Default avatar
   });
 
@@ -264,7 +264,7 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
         <div className="flex items-center justify-between bg-[#1B4242] p-4 shadow-md">
           <div className="flex items-center">
           <img
-        src={user.avatar}
+        src={localStorage.getItem("pp")}
         alt={`${user.name}'s avatar`}
         className="w-12 h-12 rounded-full object-cover mr-4 border-2 border-white shadow-sm cursor-pointer"
         onClick={handleAvatarClick}

@@ -125,6 +125,7 @@ const ChatPage = () => {
                         messages={messages}
                         setMessages={setMessages}
                         chatId={chatId}
+                        users={users}
                         handleCallInitiation={handleCallInitiation} // Pass the handleCallInitiation function to ChatWindow
                     />
                 ) : (
