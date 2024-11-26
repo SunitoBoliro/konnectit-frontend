@@ -53,6 +53,19 @@ export const fetchUsers = async () => {
     return response.data;
 };
 
+// get request of own info
+export const fetchOwnInfo = async () => {
+  const token = getToken();
+    const email = localStorage.getItem("currentLoggedInUser")
+    if (!token) throw new Error("Token not found in local storage");
+    const response = await axios.get(`${API_BASE_URL}/own-user-info/${email}`, {
+        params: { token: encodeURIComponent(token) },
+    });
+    // localStorage.setItem("pp",response.data.pp)
+    localStorage.setItem("own_pp", response.data[0].pp)
+    return response.data;
+}
+
 export const fetchMessages = async (chatId, sender) => {
     const token = getToken();
     if (!token) throw new Error("Token not found in local storage");
