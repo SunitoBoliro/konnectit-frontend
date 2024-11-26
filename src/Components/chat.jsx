@@ -73,7 +73,7 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
                         className="flex items-center p-3 rounded-lg hover:bg-[#9EC8B9] cursor-pointer"
                     >
                       <img
-                          src={pp}
+                          src={localStorage.getItem("pp")}
                           alt={user.username}
                           className="w-10 h-10 rounded-full mr-3"
                       />

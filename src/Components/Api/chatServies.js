@@ -48,7 +48,8 @@ export const fetchUsers = async () => {
     const response = await axios.get(`${API_BASE_URL}/users/${email}`, {
         params: { token: encodeURIComponent(token) },
     });
-    localStorage.setItem("pp",response.data.pp)
+    // localStorage.setItem("pp",response.data.pp)
+    localStorage.setItem("pp", response.data[0].pp)
     return response.data;
 };
 
