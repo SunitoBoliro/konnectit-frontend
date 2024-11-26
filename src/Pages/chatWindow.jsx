@@ -16,7 +16,7 @@ import {
 import { FiSend } from "react-icons/fi";
 import EmojiPicker from 'emoji-picker-react';
 // import ContextMenu from "../Components/contextMenu.jsx";
-import UserModal from "../Components/UserInfoModal";
+// import UserModal from "../Components/UserInfoModal";
 
 const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCallInitiation }) => {
   const [newMessage, setNewMessage] = useState("");
@@ -269,12 +269,12 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
         className="w-12 h-12 rounded-full object-cover mr-4 border-2 border-white shadow-sm cursor-pointer"
         onClick={handleAvatarClick}
       />
-      <UserModal
+      {/* <UserModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         user={user}
         onUpdateAvatar={handleUpdateAvatar}
-      />
+      /> */}
             <div>
               <h1 className="text-xl font-bold text-white">{chat.name}</h1>
               <p className="text-sm text-gray-300">
