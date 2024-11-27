@@ -2,15 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AiOutlineMessage, AiOutlinePhone, AiOutlineLogout } from 'react-icons/ai';
 import UserModal from '../Components/userImagenavmodal'; // Import UserModal component
-import { fetchOwnInfo } from './Api/chatServies';
+import { fetchOwnInfo, changeProfilePicture } from './Api/chatServies';
+import {getToken} from "./Api/authService.js";
 
 const NavBar = ({ onLogout }) => {
   const navigate = useNavigate();
   const [dataUser, setDataUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState(localStorage.getItem('own_pp')); // State to manage avatar image
+  const [avatarUrl, setAvatarUrl] = useState(localStorage.getItem('own_pp')); // State to manage avatar imag
+
 
   // Fetch user data from API
+
+  const updateCurrentLoggedInUserProfilePicture = async(pp, email, token) => {
+    try{
+      const updateUserPP = await changeProfilePicture(pp, email, token)
+      const reloadPP = fetchOwnInfoX()
+    }catch (error) {
+      console.error('Error fetching user info:', error.message);
+    }
+  }
   const fetchOwnInfoX = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -39,9 +50,19 @@ const NavBar = ({ onLogout }) => {
   // Handle image change in the parent component
   const handleImageChange = (file) => {
     const reader = new FileReader();
-    reader.onloadend = () => {
+    reader.onloadend = async () => {
       setAvatarUrl(reader.result); // Update the avatar URL in the parent component
-      localStorage.setItem('own_pp', reader.result); // Save updated image in localStorage
+      await updateCurrentLoggedInUserProfilePicture(reader.result, localStorage.getItem("currentLoggedInUser"), getToken())
+      // localStorage.setItem('own_pp', reader.result); // Save updated image in localStorage
+    };
+    reader.readAsDataURL(file); // Convert image to base64 for preview
+  };
+  const handleImageChangeX = (file) => {
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      setAvatarUrl(reader.result); // Update the avatar URL in the parent component
+      await updateCurrentLoggedInUserProfilePicture(reader.result, localStorage.getItem("currentLoggedInUser"), getToken())
+      // localStorage.setItem('own_pp', reader.result); // Save updated image in localStorage
     };
     reader.readAsDataURL(file); // Convert image to base64 for preview
   };
@@ -93,7 +114,8 @@ const NavBar = ({ onLogout }) => {
         <UserModal
           onClose={toggleModal} // Close modal on close
           dataUser={dataUser}
-          onImageChange={handleImageChange} // Handle image change in parent component
+          onImageChange={handleImageChange}// Handle image change in parent component
+          onImageChangeX={handleImageChangeX}// Handle image change in parent component
         />
       )}
     </div>

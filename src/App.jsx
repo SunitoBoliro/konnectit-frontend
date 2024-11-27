@@ -4,6 +4,7 @@ import AllRoutes from "./Allroutes/index";
 import NavBar from "./Components/Navbar";
 import { validateToken, getToken } from "./Components/Api/authService";
 import axios from "axios";
+import {fetchOwnInfo, fetchUsers} from "./Components/Api/chatServies.js";
 
 export default function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -62,9 +63,11 @@ export default function App() {
     );
 }
 
+
 const ConditionalNavBar = ({ isAuthenticated, handleLogout }) => {
     const location = useLocation();
     const hideNavBar = ["/","/login", "/register"].includes(location.pathname);
-
-    return !hideNavBar && isAuthenticated ? <NavBar onLogout={handleLogout} /> : null;
+    const data = fetchOwnInfo()
+    console.log(data)
+    return !hideNavBar && isAuthenticated ? <NavBar onLogout={handleLogout}  userData={data}/> : null;
 };
