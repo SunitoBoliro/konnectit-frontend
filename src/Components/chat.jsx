@@ -1,22 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { MdPersonAddAlt } from "react-icons/md";
 import { joinChat } from "./Api/chatServies.js";
-import pp from "../assets/img.png"
 
 const Chats = ({ users, setSelectedChat, refreshChats }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [email, setEmail] = useState("");
-  const [details, setDetails] = useState(null)
+  const [details, setDetails] = useState(null);
+
+  const [contextMenu, setContextMenu] = useState({
+    isVisible: false,
+    x: 0,
+    y: 0,
+    user: null,
+  });
+
+  const contextMenuRef = useRef(null);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
 
-  const filteredUsers = users.filter((user) =>
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = users.filter(
+      (user) =>
+          user.username.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAddUser = async () => {
@@ -25,7 +33,7 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
 
     try {
       const response = await joinChat(userId, email, token);
-      setDetails(response.detail)
+      setDetails(response.detail);
       if (response.detail === "Chat joined successfully") {
         refreshChats(); // Refresh chat list after successful addition
       } else {
@@ -39,10 +47,37 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
     }
   };
 
+  const handleRightClick = (e, user) => {
+    e.preventDefault();
+    setContextMenu({
+      isVisible: true,
+      x: e.clientX,
+      y: e.clientY,
+      user: user,
+    });
+  };
+
+  const closeContextMenu = () => {
+    setContextMenu({ isVisible: false, x: 0, y: 0, user: null });
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (contextMenuRef.current && !contextMenuRef.current.contains(event.target)) {
+        closeContextMenu();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-      <div className="relative">
+      <div className="relative h-screen bg-[#1B4242]">
         {/* Fixed Header Section */}
-        <div className="fixed top-0 left-18 w-[30.5vw] bg-[#1B4242]  p-4 shadow-md">
+        <div className="sticky top-0 bg-[#1B4242] p-4 shadow-md z-10">
           <div className="flex items-center justify-between">
             <h1 className="text-xl font-bold text-white">Chats</h1>
             {/* Add User Icon */}
@@ -58,42 +93,83 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
               value={searchTerm}
               onChange={handleSearch}
               placeholder="Search"
-              className="w-full mt-4 p-2 rounded-lg text-white bg-[#5C8374]"
+              className="w-full mt-4 p-2 rounded-lg text-white bg-[#5C8374] placeholder-gray-300"
           />
         </div>
 
         {/* List of Chats */}
-        <div className="mt-28 p-6 font-sans">
-          <ul className="space-y-2">
+        <div className="overflow-y-auto h-[calc(100vh-120px)]">
+          <ul className="space-y-2 p-4">
             {filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => (
                     <li
                         key={user.email}
                         onClick={() => setSelectedChat(user)}
+                        onContextMenu={(e) => handleRightClick(e, user)}
                         className="flex items-center p-3 rounded-lg hover:bg-[#9EC8B9] cursor-pointer"
                     >
                       <img
-                          src={localStorage.getItem("pp")}
+                          src={user.pp}
                           alt={user.username}
                           className="w-10 h-10 rounded-full mr-3"
                       />
                       <div>
-                        <div className="font-semibold">{user.username}</div>
-                        <div className="text-sm text-white">{user.email}</div>
+                        <div className="font-semibold text-white">{user.username}</div>
+                        <div className="text-sm text-gray-300">{user.email}</div>
                       </div>
+                      {localStorage.setItem(`pp-${user.email}`, user.pp)}
                     </li>
                 ))
             ) : (
-                <div className="mt-12 text-white flex items-center justify-center font-semibold">No users available</div>
+                <div className="mt-12 text-white flex items-center justify-center font-semibold">
+                  No users available
+                </div>
             )}
           </ul>
         </div>
+
+        {/* Context Menu */}
+        {contextMenu.isVisible && (
+            <div
+                ref={contextMenuRef}
+                className="fixed bg-white shadow-lg rounded-lg overflow-hidden z-50"
+                style={{
+                  top: `${contextMenu.y}px`,
+                  left: `${contextMenu.x}px`,
+                  transform: 'translate(-50%, -50%)',
+                }}
+            >
+              <div className="p-4 bg-[#1B4242] text-white">
+                <h3 className="text-lg font-semibold mb-1">{contextMenu.user?.username}</h3>
+                <p className="text-sm text-gray-300">{contextMenu.user?.email}</p>
+              </div>
+              <div className="p-2">
+                <button
+                    onClick={() => {
+                      setSelectedChat(contextMenu.user);
+                      closeContextMenu();
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-[#9EC8B9] text-[#1B4242]"
+                >
+                  Open Chat
+                </button>
+                <button
+                    onClick={closeContextMenu}
+                    className="w-full text-left px-4 py-2 hover:bg-[#9EC8B9] text-[#1B4242]"
+                >
+                  View Info
+                </button>
+              </div>
+            </div>
+        )}
 
         {/* Add User Modal */}
         {isModalOpen && (
             <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
               <div className="bg-[#1B4242] p-6 rounded-lg shadow-2xl w-96">
-                <h2 className="text-2xl font-semibold text-white mb-6 text-center">Add New User</h2>
+                <h2 className="text-2xl font-semibold text-white mb-6 text-center">
+                  Add New User
+                </h2>
                 <input
                     type="email"
                     value={email}
@@ -124,7 +200,11 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
             <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
               <div className="bg-[#1B4242] p-6 rounded-lg shadow-2xl w-80">
                 <h2 className="text-xl font-semibold text-white mb-4 text-center">Error</h2>
-                <p className="text-white text-center mb-6">{`${details === "User already in chat" ? "User Already in Chat!" : 'User Not Found!'}`}</p>
+                <p className="text-white text-center mb-6">
+                  {details === "User already in chat"
+                      ? "User Already in Chat!"
+                      : "User Not Found!"}
+                </p>
                 <div className="flex justify-center">
                   <button
                       onClick={() => setIsErrorModalOpen(false)}
@@ -141,3 +221,4 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
 };
 
 export default Chats;
+

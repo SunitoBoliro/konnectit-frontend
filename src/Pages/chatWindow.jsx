@@ -1,24 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
-import { fetchUserStatus, setupSSE } from "../Components/Api/chatServies";
-import pp from "../assets/img.png"
-import {
-  MdOutlineAddIcCall,
-  MdDelete,
-  MdSend,
-  MdPlayArrow,
-  MdPause
-} from "react-icons/md";
-import {
-  BsFillMicFill,
-  BsFillStopFill,
-  BsEmojiSmile
-} from "react-icons/bs";
-import { FiSend } from "react-icons/fi";
+import React, {useEffect, useRef, useState} from "react";
+import {fetchUserStatus, setupSSE} from "../Components/Api/chatServies";
+import {MdDelete, MdOutlineAddIcCall, MdPause, MdPlayArrow, MdSend} from "react-icons/md";
+import {BsEmojiSmile, BsFillMicFill, BsFillStopFill} from "react-icons/bs";
+import {FiSend} from "react-icons/fi";
 import EmojiPicker from 'emoji-picker-react';
 // import ContextMenu from "../Components/contextMenu.jsx";
 // import UserModal from "../Components/UserInfoModal";
 
-const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCallInitiation }) => {
+const ChatWindow = ({ chat, webSocket, messages, setMessages, handleCallInitiation }) => {
   const [newMessage, setNewMessage] = useState("");
   const [userStatus, setUserStatus] = useState({ online: false, last_seen: null });
   const [isRecording, setIsRecording] = useState(false);
@@ -41,8 +30,7 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [user, setUser] = useState({
     name: "John Doe",
-    email: chatUser,
-    avatar: "https://via.placeholder.com/150", // Default avatar
+    email: chatUser, // Default avatar
   });
 
   const handleAvatarClick = () => {
@@ -264,7 +252,7 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, chatId, handleCall
         <div className="flex items-center justify-between bg-[#1B4242] p-4 shadow-md">
           <div className="flex items-center">
           <img
-        src={localStorage.getItem("pp")}
+        src={localStorage.getItem(`pp-${chatUser}`)}
         alt={`${user.name}'s avatar`}
         className="w-12 h-12 rounded-full object-cover mr-4 border-2 border-white shadow-sm cursor-pointer"
         onClick={handleAvatarClick}
