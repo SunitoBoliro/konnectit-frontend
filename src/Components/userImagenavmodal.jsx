@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import defaultImage from "../assets/defaultImage"
 
-const UserModal = ({ onClose, dataUser, onImageChange, onImageChangeX, setIsDefaultImage }) => {
+const UserModal = ({ onClose, dataUser, onImageChange, onImageChangeX }) => {
   const [image, setImage] = useState(dataUser.pp || pp); // Default or provided image
   const [isFullScreen, setIsFullScreen] = useState(false);
-  setIsDefaultImage(defaultImage)
 
 
   // Handle image removal

@@ -11,7 +11,6 @@ const NavBar = ({ onLogout }) => {
   const [dataUser, setDataUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(localStorage.getItem('own_pp')); // State to manage avatar image
-  const [isDefaultImage, setIsDefaultImage] = useState(null);
 
   // Fetch user data from API
   const fetchOwnInfoX = async () => {
@@ -137,7 +136,6 @@ const NavBar = ({ onLogout }) => {
           dataUser={dataUser}
           onImageChange={handleImageChange} // Handle image change
           onImageChangeX={handleImageChangeX} // Alternative image change
-          setIsDefaultImage={setIsDefaultImage}
         />
       )}
     </div>
