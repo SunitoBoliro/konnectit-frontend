@@ -25,7 +25,7 @@ const ChatPage = () => {
             setUsers(data);
         } catch (error) {
             console.error("Error fetching users:", error);
-            setError(error.response?.data?.detail || "Failed to fetch users");
+            // setError(error.response?.data?.detail || "Failed to fetch users");
         }
     };
 

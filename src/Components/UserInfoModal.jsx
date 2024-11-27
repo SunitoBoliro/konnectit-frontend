@@ -5,6 +5,8 @@ const UserModal = ({ isOpen, onClose, user, onUpdateAvatar }) => {
   const [newImage, setNewImage] = useState(null);
   const [isImageOpen, setIsImageOpen] = useState(false); // State to toggle image modal
 
+
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {

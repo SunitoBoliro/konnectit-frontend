@@ -63,7 +63,7 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
         </div>
 
         {/* List of Chats */}
-        <div className="mt-24 p-4">
+        <div className="mt-28 p-6 font-sans">
           <ul className="space-y-2">
             {filteredUsers.length > 0 ? (
                 filteredUsers.map((user) => (
@@ -84,7 +84,7 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
                     </li>
                 ))
             ) : (
-                <div className="text-white">No users available</div>
+                <div className="mt-12 text-white flex items-center justify-center font-semibold">No users available</div>
             )}
           </ul>
         </div>

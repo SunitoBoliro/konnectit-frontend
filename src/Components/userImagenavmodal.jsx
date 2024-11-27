@@ -1,135 +1,120 @@
 import React, { useState } from 'react';
-import pp from "../assets/img.png"
+import defaultImage from "../assets/defaultImage"
 
-const UserModal = ({ onClose, dataUser, onImageChange, onImageChangeX }) => {
-  const [image, setImage] = useState(dataUser.pp); // State for image preview
-  const [isFullScreen, setIsFullScreen] = useState(false); // State for full-screen view
+const UserModal = ({ onClose, dataUser, onImageChange, onImageChangeX, setIsDefaultImage }) => {
+  const [image, setImage] = useState(dataUser.pp || pp); // Default or provided image
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  setIsDefaultImage(defaultImage)
 
-  // Handle image selection
+
+  // Handle image removal
   const handleImageChangeX = () => {
-    onImageChangeX(pp)
+    setImage(defaultImage); // Set to default placeholder
+    if (onImageChangeX) {
+      onImageChangeX(defaultImage); // Notify parent component
+    }
   };
+
+  // Handle new image selection
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImage(reader.result); // Set the image preview
+        setImage(reader.result);
         if (onImageChange) {
-          onImageChange(file); // Call onImageChange if it's a valid function
+          onImageChange(file); // Notify parent component
         }
       };
-      reader.readAsDataURL(file); // Convert image to base64 for preview
+      reader.readAsDataURL(file);
     }
   };
 
   // Toggle full-screen view
   const handleImageClick = () => {
-    setIsFullScreen(true); // Set full-screen state to true
+    setIsFullScreen(true);
   };
 
   const handleBackClick = () => {
-    setIsFullScreen(false); // Set full-screen state to false (close full-screen)
+    setIsFullScreen(false);
   };
 
   return (
-      <>
-        {/* Full Screen Image Modal */}
-        {isFullScreen && (
-            <div className="fixed inset-0 z-70 bg-black bg-opacity-75 flex items-center justify-center p-4">
-              <div className="relative">
-                {/* Close Button */}
-                <button
-                    onClick={handleBackClick} // Close full screen
-                    className="absolute top-4 left-4 text-white text-lg font-semibold bg-black bg-opacity-50 p-2 rounded"
-                >
-                  Back
-                </button>
-
-                {/* Full Screen Image */}
-                <img
-                    src={image}
-                    alt="Full Screen Avatar"
-                    className="max-w-full max-h-full object-contain bg-white shadow-lg rounded"
-                />
-              </div>
-            </div>
-        )}
-
-        {/* Main Modal */}
-        <div className="fixed inset-0 z-50 bg-gray-700 bg-opacity-75 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md p-8 rounded-lg shadow-lg transform transition-all animate-modal-in">
-            <div className="flex justify-end">
-              <button
-                  onClick={onClose}
-                  className="text-gray-600 hover:text-gray-800 font-semibold focus:outline-none"
-              >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                >
-                  <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">User Information</h2>
-
-            <div className="flex justify-center mb-6">
-              <img
-                  src={image}
-                  alt="User Avatar"
-                  className="w-24 h-24 object-cover rounded-full border-4 border-gray-300 shadow-md cursor-pointer"
-                  onClick={handleImageClick} // Open in full screen
-              />
-            </div>
-
-            <div className="flex justify-center mb-6">
-              <label className="cursor-pointer text-blue-500 hover:text-blue-700">
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange} // Handle file selection
-                    className="hidden"
-                />
-                <span className="text-sm font-medium">Change Profile Picture</span>
-              </label>
-            </div>
-
-            <div className="flex justify-center mb-6">
-              <label className="cursor-pointer text-red-500 hover:text-red-700">
-                <input
-                    onClick={handleImageChangeX} // Handle file selection
-                    className="hidden"
-                />
-                <span className="text-sm font-medium">Remove Profile Picture</span>
-              </label>
-            </div>
-
-            <div className="text-center">
-              <p className="text-xl font-medium text-gray-800 mb-2">{dataUser.username}</p>
-              <p className="text-sm text-gray-500">{dataUser.email}</p>
-            </div>
-
-            <div className="mt-6 flex justify-center">
-              <button
-                  onClick={onClose}
-                  className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
-              >
-                Close
-              </button>
-            </div>
+    <>
+      {isFullScreen && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-80 flex items-center justify-center">
+          <div className="relative">
+            <button
+              onClick={handleBackClick}
+              className="absolute top-4 left-4 bg-gray-800 text-white p-2 rounded-full"
+            >
+              Back
+            </button>
+            <img
+              src={image}
+              alt="Full Screen Avatar"
+              className="max-w-screen-md max-h-screen object-contain rounded-lg shadow-xl"
+            />
           </div>
         </div>
-      </>
+      )}
+
+      <div className="fixed inset-0 z-40 bg-gray-700 bg-opacity-75 flex items-center justify-center">
+        <div className="bg-white w-full max-w-lg p-6 rounded-lg shadow-2xl">
+          <div className="flex justify-end">
+            <button onClick={onClose} className="text-gray-600 hover:text-gray-800">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <h2 className="text-xl font-semibold text-center mb-4">User Information</h2>
+          <div className="flex justify-center mb-4">
+            <img
+              src={image}
+              alt="User Avatar"
+              className="w-28 h-28 rounded-full object-cover border-4 border-gray-300 cursor-pointer"
+              onClick={handleImageClick}
+            />
+          </div>
+          <div className="flex flex-col items-center gap-2 mb-6">
+            <label className="cursor-pointer text-blue-500 hover:text-blue-700">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+              Change Profile Picture
+            </label>
+            <button
+              onClick={handleImageChangeX}
+              className="text-red-500 hover:text-red-700"
+            >
+              Remove Profile Picture
+            </button>
+          </div>
+          <div className="text-center mb-4">
+            <p className="text-lg font-medium">{dataUser?.username}</p>
+            <p className="text-sm text-gray-500">{dataUser?.email}</p>
+          </div>
+          <div className="flex justify-center">
+            <button
+              onClick={onClose}
+              className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 

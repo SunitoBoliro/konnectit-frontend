@@ -3,25 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { AiOutlineMessage, AiOutlinePhone, AiOutlineLogout } from 'react-icons/ai';
 import UserModal from '../Components/userImagenavmodal'; // Import UserModal component
 import { fetchOwnInfo, changeProfilePicture } from './Api/chatServies';
-import {getToken} from "./Api/authService.js";
+import { getToken } from './Api/authService';
+import defaultImage from "../assets/defaultImage"
 
 const NavBar = ({ onLogout }) => {
   const navigate = useNavigate();
   const [dataUser, setDataUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState(localStorage.getItem('own_pp')); // State to manage avatar imag
-
+  const [avatarUrl, setAvatarUrl] = useState(localStorage.getItem('own_pp')); // State to manage avatar image
+  const [isDefaultImage, setIsDefaultImage] = useState(null);
 
   // Fetch user data from API
-
-  const updateCurrentLoggedInUserProfilePicture = async(pp, email, token) => {
-    try{
-      const updateUserPP = await changeProfilePicture(pp, email, token)
-      const reloadPP = fetchOwnInfoX()
-    }catch (error) {
-      console.error('Error fetching user info:', error.message);
-    }
-  }
   const fetchOwnInfoX = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -30,9 +22,9 @@ const NavBar = ({ onLogout }) => {
 
       if (data && data[0]?.pp) {
         setAvatarUrl(data[0].pp); // Update avatar URL from API
+        localStorage.setItem('own_pp', data[0].pp); // Save to localStorage
       }
       setDataUser(data[0]);
-
     } catch (error) {
       console.error('Error fetching user info:', error.message);
     }
@@ -42,29 +34,58 @@ const NavBar = ({ onLogout }) => {
     fetchOwnInfoX();
   }, []);
 
-  // Toggle Modal
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
+  // Update profile picture
+  const updateCurrentLoggedInUserProfilePicture = async (pp, email, token) => {
+    try {
+      await changeProfilePicture(pp, email, token);
+      fetchOwnInfoX(); // Refresh user info after updating profile picture
+    } catch (error) {
+      console.error('Error updating profile picture:', error.message);
+    }
   };
 
-  // Handle image change in the parent component
+  // Handle image change
   const handleImageChange = (file) => {
     const reader = new FileReader();
     reader.onloadend = async () => {
-      setAvatarUrl(reader.result); // Update the avatar URL in the parent component
-      await updateCurrentLoggedInUserProfilePicture(reader.result, localStorage.getItem("currentLoggedInUser"), getToken())
-      // localStorage.setItem('own_pp', reader.result); // Save updated image in localStorage
+      const base64Image = reader.result;
+      setAvatarUrl(base64Image); // Update the avatar URL in the parent component
+
+      // Call API to update profile picture
+      await updateCurrentLoggedInUserProfilePicture(
+        base64Image,
+        localStorage.getItem('currentLoggedInUser'),
+        getToken()
+      );
+      localStorage.setItem('own_pp', base64Image); // Save updated image in localStorage
     };
-    reader.readAsDataURL(file); // Convert image to base64 for preview
+    reader.readAsDataURL(file); // Convert image to Base64 for preview
   };
-  const handleImageChangeX = (file) => {
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      setAvatarUrl(reader.result); // Update the avatar URL in the parent component
-      await updateCurrentLoggedInUserProfilePicture(reader.result, localStorage.getItem("currentLoggedInUser"), getToken())
-      // localStorage.setItem('own_pp', reader.result); // Save updated image in localStorage
+
+  // Handle alternative image change
+  const handleImageChangeX = async (file) => {
+    
+        setAvatarUrl(defaultImage); // Update avatar in UI
+
+        // Update profile picture via API
+        const response = await updateCurrentLoggedInUserProfilePicture(
+          defaultImage,
+          localStorage.getItem('currentLoggedInUser'),
+          getToken()
+        );
+
+        if (response?.success) {
+          console.log('Profile picture updated successfully.');
+          localStorage.setItem('own_pp', defaultImage); // Save updated image in localStorage
+        } else {
+          console.error('Failed to update profile picture:', response?.message || 'Unknown error');
+        }
+       // Convert image to Base64
     };
-    reader.readAsDataURL(file); // Convert image to base64 for preview
+
+  // Toggle Modal
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
   };
 
   return (
@@ -112,10 +133,11 @@ const NavBar = ({ onLogout }) => {
       {/* Profile Modal */}
       {isModalOpen && (
         <UserModal
-          onClose={toggleModal} // Close modal on close
+          onClose={toggleModal} // Close modal
           dataUser={dataUser}
-          onImageChange={handleImageChange}// Handle image change in parent component
-          onImageChangeX={handleImageChangeX}// Handle image change in parent component
+          onImageChange={handleImageChange} // Handle image change
+          onImageChangeX={handleImageChangeX} // Alternative image change
+          setIsDefaultImage={setIsDefaultImage}
         />
       )}
     </div>

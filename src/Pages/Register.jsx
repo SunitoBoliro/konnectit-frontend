@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../Components/Api/authService";
-import "./home.css";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./loader.css";
 
 const Registration = () => {
     const navigate = useNavigate();
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
     const [image, setImage] = useState(null); // State to hold the Base64 image
+    const [isLoading, setIsLoading] = useState(false); // For loader state
 
     // Handle the image input change (convert to Base64)
     const handleImageChange = (e) => {
@@ -24,26 +26,43 @@ const Registration = () => {
     };
 
     const handleRegister = async () => {
+        setIsLoading(true); // Start loader
         try {
             const userData = {
                 username: name,
                 email,
                 password,
-                pp: image // Include the Base64 string of the profile picture
+                pp: image, // Include the Base64 string of the profile picture
             };
             await registerUser(userData);
-            alert("Registration successful! Please login.");
-            navigate("/login");
+
+            // Success toast message with timeout
+            toast.success("Registration successful! Redirecting to login...", {
+                position: "top-center",
+                autoClose: 3000, // Auto dismiss after 3 seconds
+            });
+
+            // Delay navigation to show success toast
+            setTimeout(() => {
+                navigate("/login");
+            }, 3000);
         } catch (error) {
-            setError(error);
+            // Error toast message
+            const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+            toast.error(errorMessage, {
+                position: "top-center",
+                autoClose: 3000, // Auto dismiss after 3 seconds
+            });
+        } finally {
+            setIsLoading(false); // Stop loader
         }
     };
 
     return (
         <div className="flex items-center justify-center h-screen bg-gradient-to-r from-[#1B4242] via-[#5C8374] to-[#9EC8B9] text-white">
+            <ToastContainer />
             <div className="bg-[#092635] p-10 rounded-lg shadow-2xl w-full max-w-md border border-teal-500 neon-glow">
                 <h2 className="text-4xl font-bold mb-6 text-center text-teal-400">Register</h2>
-                {error && <p className="text-red-500 mb-4">{error}</p>}
 
                 <div className="mb-4">
                     <label className="block text-teal-300 text-sm font-semibold mb-2">Name</label>
@@ -87,8 +106,14 @@ const Registration = () => {
                     />
                 </div>
 
-                <button onClick={handleRegister} className="w-full bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition transform hover:scale-105 neon-button">
-                    Register
+                <button
+                    onClick={handleRegister}
+                    className={`w-full bg-teal-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition transform hover:scale-105 neon-button ${
+                        isLoading && "opacity-50 cursor-not-allowed"
+                    }`}
+                    disabled={isLoading}
+                >
+                    {isLoading ? "Processing..." : "Register"}
                 </button>
 
                 <div className="text-center mt-4">
