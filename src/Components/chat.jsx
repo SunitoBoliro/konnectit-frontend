@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { MdPersonAddAlt } from "react-icons/md";
+import { MdPersonAddAlt , MdDelete } from "react-icons/md";
 import { joinChat } from "./Api/chatServies.js";
+import {  deleteChatHistory, deleteUserFromChats } from "./Api/Delete APIS/index.js"; // Import API services
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Chats = ({ users, setSelectedChat, refreshChats }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -61,6 +64,40 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
     setContextMenu({ isVisible: false, x: 0, y: 0, user: null });
   };
 
+  const handleDeleteChatHistory = async () => {
+    if (!contextMenu.user) return;
+
+    try {
+      const response = await deleteChatHistory(
+        localStorage.getItem("currentLoggedInUser"),
+        contextMenu.user.email
+      );
+      toast.success(response.detail); // Show success message
+      refreshChats(); // Refresh chats automatically
+      closeContextMenu(); // Close context menu
+    } catch (error) {
+      toast.error(error.detail || "Failed to delete chat history"); // Show error message
+      console.error("Error deleting chat history:", error);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!contextMenu.user) return;
+
+    try {
+      const response = await deleteUserFromChats(
+        contextMenu.user.email,
+        localStorage.getItem("currentLoggedInUser")
+      );
+      toast.success(response.detail); // Show success message
+      refreshChats(); // Refresh chats automatically
+      closeContextMenu(); // Close context menu
+    } catch (error) {
+      toast.error(error.detail || "Failed to delete user"); // Show error message
+      console.error("Error deleting user:", error);
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (contextMenuRef.current && !contextMenuRef.current.contains(event.target)) {
@@ -71,8 +108,10 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+
     };
-  }, []);
+    
+  }, );
 
   return (
       <div className="relative h-screen bg-[#1B4242]">
@@ -130,21 +169,21 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
 
         {/* Context Menu */}
         {contextMenu.isVisible && (
-            <div
-                ref={contextMenuRef}
-                className="fixed bg-white shadow-lg rounded-lg overflow-hidden z-50"
-                style={{
-                  top: `${contextMenu.y}px`,
-                  left: `${contextMenu.x}px`,
-                  transform: 'translate(-50%, -50%)',
-                }}
-            >
-              <div className="p-4 bg-[#1B4242] text-white">
-                <h3 className="text-lg font-semibold mb-1">{contextMenu.user?.username}</h3>
-                <p className="text-sm text-gray-300">{contextMenu.user?.email}</p>
-              </div>
-              <div className="p-2">
-                <button
+        <div
+          ref={contextMenuRef}
+          className="fixed bg-white shadow-lg rounded-lg z-30"
+          style={{
+            top: `${contextMenu.y}px`,
+            left: `${contextMenu.x}px`,
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <div className="p-4 bg-[#1B4242] text-white">
+            <h3 className="text-lg font-semibold mb-1">{contextMenu.user?.username}</h3>
+            <p className="text-sm text-gray-300">{contextMenu.user?.email}</p>
+          </div>
+          <div className="p-2">
+          <button
                     onClick={() => {
                       setSelectedChat(contextMenu.user);
                       closeContextMenu();
@@ -159,9 +198,21 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
                 >
                   View Info
                 </button>
-              </div>
-            </div>
-        )}
+            <button
+              onClick={handleDeleteChatHistory}
+              className="w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-[#9EC8B9] text-[#1B4242]"
+            >
+              <MdDelete /> Delete Chat History
+            </button>
+            <button
+              onClick={handleDeleteUser}
+              className="w-full text-left px-4 py-2 flex items-center gap-2 hover:bg-[#9EC8B9] text-[#1B4242]"
+            >
+              <MdDelete /> Delete User
+            </button>
+          </div>
+        </div>
+      )}
 
         {/* Add User Modal */}
         {isModalOpen && (
@@ -216,6 +267,7 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
               </div>
             </div>
         )}
+        <ToastContainer position="top-right" autoClose={3000} />
       </div>
   );
 };
