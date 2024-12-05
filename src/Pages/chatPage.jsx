@@ -69,15 +69,29 @@ const ChatPage = () => {
 
     const fetchMessagesData = async (chatId) => {
         try {
+            // Retrieve necessary data from localStorage
             const token = localStorage.getItem("token");
             const sender = localStorage.getItem("currentLoggedInUser");
+
+            // Fetch messages data
             const data = await fetchMessages(chatId, sender, token);
-            setMessages(data);
+
+            // Filter messages where sender is included in the identifier array
+            const filteredMessages = data.filter(message => message?.identifier?.includes(sender));
+
+            // If there are any messages with the sender, set those messages
+            if (filteredMessages.length > 0) {
+                setMessages(filteredMessages); // Set only the filtered messages
+            } else {
+                setMessages([]); // Optionally clear messages if none match
+            }
         } catch (error) {
+            // Handle error and display a user-friendly message
             console.error("Error fetching messages:", error);
             setError(error.response?.data?.detail || "Failed to fetch messages");
         }
     };
+
 
     const handleChatSelection = async (user) => {
         const chatId = user.email;

@@ -169,6 +169,7 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, handleCallInitiati
       sender: userEmail,
       type: "audio",
       format: "base64",
+      identifier: [chatUser, userEmail],
     };
 
     if (webSocket?.readyState === WebSocket.OPEN) {
@@ -192,6 +193,7 @@ const ChatWindow = ({ chat, webSocket, messages, setMessages, handleCallInitiati
       sender: userEmail,
       type: newMessage.trim() ? "text" : "audio",
       format: audioBlob ? "base64" : undefined,
+      identifier: [chatUser, userEmail],
     };
 
     if (webSocket?.readyState === WebSocket.OPEN) {
