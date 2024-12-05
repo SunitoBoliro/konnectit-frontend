@@ -5,7 +5,7 @@ import {  deleteChatHistory, deleteUserFromChats } from "./Api/Delete APIS/index
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const Chats = ({ users, setSelectedChat, refreshChats }) => {
+const Chats = ({ users, setSelectedChat, refreshChats, fetchMessageData }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
@@ -73,7 +73,7 @@ const Chats = ({ users, setSelectedChat, refreshChats }) => {
         contextMenu.user.email
       );
       toast.success(response.detail); // Show success message
-      refreshChats(); // Refresh chats automatically
+      fetchMessageData() // Refresh chats automatically
       closeContextMenu(); // Close context menu
     } catch (error) {
       toast.error(error.detail || "Failed to delete chat history"); // Show error message

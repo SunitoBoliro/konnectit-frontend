@@ -61,6 +61,12 @@ const ChatPage = () => {
         };
     }, []);
 
+    const fetchMessageForChat = () => {
+        if (selectedChat) {
+            fetchMessagesData(selectedChat.email);
+        }
+    }
+
     useEffect(() => {
         if (selectedChat) {
             fetchMessagesData(selectedChat.email);
@@ -127,7 +133,7 @@ const ChatPage = () => {
     return (
         <div className="flex h-screen bg-[#1B4242] text-white">
             <div className="ml-20 w-1/3 border-r border-gray-700 custom-scrollbar">
-                <Chats users={users} setSelectedChat={handleChatSelection} refreshChats={refreshChats} />
+                <Chats users={users} setSelectedChat={handleChatSelection} refreshChats={refreshChats} fetchMessageData ={fetchMessageForChat} />
                 {error && <div className="mt-4 text-red-500 text-sm">{error}</div>}
             </div>
 
