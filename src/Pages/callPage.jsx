@@ -17,7 +17,7 @@ const CallPage = () => {
             <div className="w-2/3">
                 {selectedChat ? (
                     sessionStorage.setItem("callinfo", selectedChat)
-                ) : null}
+                ): null}
                 {selectedChat ? (
                     <CallInfo/>
                 ) : (

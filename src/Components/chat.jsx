@@ -125,7 +125,6 @@ const Chats = ({headingname, users, setSelectedChat, refreshChats, fetchMessageD
                 onClick={() => setIsModalOpen(true)}
             />
           </div>
-
           {/* Search Input */}
           <input
               type="text"
