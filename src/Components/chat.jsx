@@ -5,7 +5,7 @@ import {  deleteChatHistory, deleteUserFromChats } from "./Api/Delete APIS/index
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const Chats = ({ users, setSelectedChat, refreshChats, fetchMessageData }) => {
+const Chats = ({headingname, users, setSelectedChat, refreshChats, fetchMessageData }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
@@ -118,7 +118,7 @@ const Chats = ({ users, setSelectedChat, refreshChats, fetchMessageData }) => {
         {/* Fixed Header Section */}
         <div className="sticky top-0 bg-[#1B4242] p-4 shadow-md z-10">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold text-white">Chats</h1>
+            <h1 className="text-xl font-bold text-white">{headingname}</h1>
             {/* Add User Icon */}
             <MdPersonAddAlt
                 className="text-2xl text-white cursor-pointer"

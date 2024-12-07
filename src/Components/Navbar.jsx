@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AiOutlineMessage, AiOutlinePhone, AiOutlineLogout } from 'react-icons/ai';
+import { RiGroupLine } from "react-icons/ri";
 import UserModal from '../Components/userImagenavmodal'; // Import UserModal component
 import { fetchOwnInfo, changeProfilePicture } from './Api/chatServies';
 import { getToken } from './Api/authService';
@@ -102,10 +103,10 @@ const NavBar = ({ onLogout }) => {
           </li>
           <li>
             <button
-              onClick={() => navigate('/callpage')}
+              onClick={() => navigate('/GroupChatPage')}
               className="flex items-center space-x-3 hover:text-amber-300 transition"
             >
-              <AiOutlinePhone size={24} />
+              <RiGroupLine size={24} />
             </button>
           </li>
           <li>
