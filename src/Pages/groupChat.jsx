@@ -6,7 +6,7 @@ import ChatWindow from "./chatWindow";
 // import CallModal from "./CallModal"; // Import the CallModal component
 import CallModal from "../Components/callModal.jsx"
 
-const ChatPage = () => {
+const GroupChat = () => {
     const [selectedChat, setSelectedChat] = useState(null);
     const [webSocket, setWebSocket] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -133,7 +133,7 @@ const ChatPage = () => {
     return (
         <div className="flex h-screen bg-[#1B4242] text-white">
             <div className="ml-20 w-1/3 border-r border-gray-700 custom-scrollbar">
-                <Chats headingname={"Welcome to 1-on-1 Chats"} users={users} setSelectedChat={handleChatSelection} refreshChats={refreshChats} fetchMessageData ={fetchMessageForChat} />
+                <Chats headingname={"Welcome to Group Chats"} users={users} setSelectedChat={handleChatSelection} refreshChats={refreshChats} fetchMessageData ={fetchMessageForChat} />
                 {error && <div className="mt-4 text-red-500 text-sm">{error}</div>}
             </div>
 
@@ -167,4 +167,4 @@ const ChatPage = () => {
     );
 };
 
-export default ChatPage;
+export default GroupChat;
