@@ -43,15 +43,35 @@ const getToken = () => localStorage.getItem("token");
 
 export const fetchUsers = async () => {
     const token = getToken();
-    const email = localStorage.getItem("currentLoggedInUser")
+    const email = localStorage.getItem("currentLoggedInUser");
+    
     if (!token) throw new Error("Token not found in local storage");
+    
     const response = await axios.get(`${API_BASE_URL}/users/${email}`, {
         params: { token: encodeURIComponent(token) },
     });
-    // localStorage.setItem("pp",response.data.pp)
-    localStorage.setItem("pp", response.data[0].pp)
+
+    // Retrieve existing emails or initialize an empty array
+    const bullets = JSON.parse(localStorage.getItem("bullets")) || [];
+    
+    // Loop through response data and add emails if not already in the array
+    response.data.forEach((user) => {
+        if (!bullets.includes(user.email)) {
+            bullets.push(user.email); // Add the email to the bullets array
+        }
+    });
+
+    // Save the updated bullets array to localStorage
+    localStorage.setItem("bullets", JSON.stringify(bullets));
+
+    // Set the profile picture for the first user (or update logic for multiple users as needed)
+    if (response.data.length > 0) {
+        localStorage.setItem("pp", response.data[0].pp);
+    }
+
     return response.data;
 };
+
 
 // get request of own info
 export const fetchOwnInfo = async () => {

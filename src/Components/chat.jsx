@@ -272,4 +272,3 @@ const Chats = ({headingname, users, setSelectedChat, refreshChats, fetchMessageD
 };
 
 export default Chats;
-

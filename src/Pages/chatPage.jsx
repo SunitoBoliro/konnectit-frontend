@@ -21,6 +21,7 @@ const ChatPage = () => {
         try {
             const token = localStorage.getItem("token");
             if (!token) throw new Error("Token not found in local storage");
+            // localStorage.getItem
             const data = await fetchUsers(token);
             setUsers(data);
         } catch (error) {
@@ -133,7 +134,12 @@ const ChatPage = () => {
     return (
         <div className="flex h-screen bg-[#1B4242] text-white">
             <div className="ml-20 w-1/3 border-r border-gray-700 custom-scrollbar">
-                <Chats headingname={"Welcome to 1-on-1 Chats"} users={users} setSelectedChat={handleChatSelection} refreshChats={refreshChats} fetchMessageData ={fetchMessageForChat} />
+                <Chats headingname={"Welcome to Chats"} 
+                    users={users} 
+                    setSelectedChat={handleChatSelection} 
+                    refreshChats={refreshChats} 
+                    fetchMessageData ={fetchMessageForChat} 
+                />
                 {error && <div className="mt-4 text-red-500 text-sm">{error}</div>}
             </div>
 
